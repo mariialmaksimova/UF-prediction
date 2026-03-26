@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Flow Variants — Prediction Markets Platform</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+  --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+  --green: #00c853; --green-dim: rgba(0,200,83,0.1);
+  --red: #ff4444; --red-dim: rgba(255,68,68,0.1);
+  --blue: #58a6ff; --blue-dim: rgba(88,166,255,0.1);
+  --orange: #ff8c00; --orange-dim: rgba(255,140,0,0.1);
+  --yellow: #ffd700; --yellow-dim: rgba(255,215,0,0.1);
+  --cyan: #4fc3f7; --purple: #bc8cff; --purple-dim: rgba(188,140,255,0.1);
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 13px; }
+
+.header { background: rgba(13,17,23,0.97); border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+.logo { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.header-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.tab-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 28px; display: flex; align-items: center; gap: 2px; position: sticky; top: 57px; z-index: 99; overflow-x: auto; }
+.tab { padding: 10px 16px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+.page { display: none; padding: 28px; max-width: 1400px; }
+.page.active { display: block; }
+
+/* SECTION */
+.section-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* FLOW DIAGRAM */
+.flow-wrap { overflow-x: auto; padding-bottom: 8px; margin-bottom: 32px; }
+.flow { display: flex; align-items: flex-start; gap: 0; min-width: max-content; }
+.flow-arrow { display: flex; align-items: center; padding-top: 32px; color: var(--muted); font-size: 18px; padding: 0 4px; align-self: center; flex-shrink: 0; margin-top: -60px; }
+
+.zone { width: 210px; flex-shrink: 0; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+.zone-head { padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 3px; }
+.zone-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: .7; }
+.zone-title { font-size: 13px; font-weight: 700; }
+.zone-trigger { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.zone-body { padding: 10px 14px 14px; background: var(--bg2); display: flex; flex-direction: column; gap: 6px; }
+.zone-item { font-size: 11px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+.zone-item .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.zone-item.blocked { color: var(--muted); opacity: .5; }
+.zone-item.blocked .dot { background: var(--border); }
+.zone-item.locked { color: var(--yellow); }
+.zone-item.locked .dot { background: var(--yellow); }
+.zone-item.available { color: var(--text); }
+.zone-item.available .dot { background: var(--green); }
+.zone-item.highlight { color: var(--green); font-weight: 600; }
+.zone-item.highlight .dot { background: var(--green); }
+
+.zone-footer { padding: 8px 14px; background: var(--bg3); border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); line-height: 1.4; }
+
+/* Zone color themes */
+.zone-grey .zone-head { background: rgba(139,148,158,.08); }
+.zone-grey .zone-title { color: var(--muted); }
+.zone-blue .zone-head { background: var(--blue-dim); }
+.zone-blue .zone-title { color: var(--blue); }
+.zone-orange .zone-head { background: var(--orange-dim); }
+.zone-orange .zone-title { color: var(--orange); }
+.zone-green .zone-head { background: var(--green-dim); }
+.zone-green .zone-title { color: var(--green); }
+.zone-yellow .zone-head { background: var(--yellow-dim); }
+.zone-yellow .zone-title { color: var(--yellow); }
+.zone-purple .zone-head { background: var(--purple-dim); }
+.zone-purple .zone-title { color: var(--purple); }
+
+/* VARIANT CARD */
+.variant-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 40px; overflow: hidden; }
+.variant-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.variant-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.variant-desc { font-size: 12px; color: var(--muted); max-width: 600px; line-height: 1.5; }
+.variant-meta { display: flex; gap: 8px; flex-wrap: wrap; flex-shrink: 0; align-items: flex-start; }
+.meta-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; border: 1px solid; white-space: nowrap; }
+.pill-green { color: var(--green); border-color: rgba(0,200,83,.3); background: var(--green-dim); }
+.pill-yellow { color: var(--yellow); border-color: rgba(255,215,0,.3); background: var(--yellow-dim); }
+.pill-orange { color: var(--orange); border-color: rgba(255,140,0,.3); background: var(--orange-dim); }
+.pill-red { color: var(--red); border-color: rgba(255,68,68,.3); background: var(--red-dim); }
+.pill-blue { color: var(--blue); border-color: rgba(88,166,255,.3); background: var(--blue-dim); }
+.variant-body { padding: 20px; }
+
+/* COMPARISON TABLE */
+.comp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.comp-table th { background: var(--bg3); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: .5px; padding: 10px 14px; text-align: left; border-bottom: 2px solid var(--border); white-space: nowrap; }
+.comp-table th:first-child { width: 180px; }
+.comp-table td { padding: 10px 14px; border-bottom: 1px solid rgba(48,54,61,.5); vertical-align: middle; }
+.comp-table tr:hover td { background: var(--bg2); }
+.comp-table tr:last-child td { border-bottom: none; }
+.comp-table .rec-col { background: rgba(0,200,83,.04); }
+.comp-table .rec-col td { border-left: 2px solid rgba(0,200,83,.3); }
+
+.star { color: var(--yellow); }
+.dot-green { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+.dot-yellow { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); }
+.dot-red { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+
+/* DUAL BRAND special diagram */
+.dual-brand-wrap { display: flex; gap: 20px; align-items: flex-start; }
+.dual-brand-col { flex: 1; }
+.dual-brand-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin-bottom: 8px; }
+.db-box { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.db-box-head { padding: 12px 14px; display: flex; align-items: center; gap: 8px; }
+.db-box-body { padding: 10px 14px 14px; background: var(--bg2); }
+.db-arrow-col { display: flex; align-items: center; padding-top: 60px; font-size: 22px; color: var(--muted); flex-direction: column; gap: 4px; }
+.db-arrow-label { font-size: 9px; color: var(--muted); text-align: center; white-space: nowrap; }
+
+/* GAMIFIED special */
+.levels-wrap { display: flex; flex-direction: column; gap: 3px; margin: 6px 0; }
+.level-row { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; font-size: 11px; }
+.level-row.level-1 { background: rgba(139,148,158,.08); }
+.level-row.level-2 { background: rgba(88,166,255,.08); }
+.level-row.level-3 { background: rgba(255,215,0,.08); }
+.level-row.level-4 { background: rgba(0,200,83,.1); }
+.level-icon { font-size: 13px; width: 20px; text-align: center; }
+.level-name { font-weight: 600; width: 80px; }
+.level-desc { color: var(--muted); flex: 1; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { height: 5px; width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.badge-rec { background: rgba(0,200,83,.15); color: var(--green); border: 1px solid rgba(0,200,83,.3); padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+
+.divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+.note-box { background: rgba(88,166,255,.07); border: 1px solid rgba(88,166,255,.2); border-radius: 8px; padding: 12px 16px; font-size: 11px; color: var(--blue); line-height: 1.6; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo"><span class="logo-dot"></span> User Flow Variants — Prediction Markets Platform</div>
+    <div class="header-sub">🇮🇩 Индонезия · 🇳🇬 Нигерия · KYC: Sumsub · KPI: FTD · Март 2026</div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab active" onclick="showPage('overview',this)">📋 Обзор</button>
+  <button class="tab" onclick="showPage('va',this)">A — Progressive (твой)</button>
+  <button class="tab" onclick="showPage('vb',this)">B — KYC Tiers</button>
+  <button class="tab" onclick="showPage('vc',this)">C — Тест знаний</button>
+  <button class="tab" onclick="showPage('vd',this)">D — Геймификация</button>
+  <button class="tab" onclick="showPage('ve',this)">E — Dual Brand</button>
+  <button class="tab" onclick="showPage('vrec',this)">⭐ B+D Рекомендация</button>
+  <button class="tab" onclick="showPage('compare',this)">📊 Сравнение</button>
+</div>
+
+<!-- ══════════════════════════════════════ OVERVIEW ══════════════════════════════════════ -->
+<div id="page-overview" class="page active">
+
+  <div class="note-box">
+    Ключевой принцип: <strong>неавторизованная зона</strong> и рекламные объявления показывают только prediction markets (аналог Polymarket). Binary options, FX и крипто скрыты до прохождения KYC + депозита. Именно эту зону проверяют модераторы Google и Meta.
+  </div>
+
+  <div style="margin-bottom: 12px;" class="section-title">Что видно в каждой зоне — сравнение</div>
+
+  <div style="overflow-x:auto">
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>Функция</th>
+        <th>Unauth / Tier 0</th>
+        <th>Registered / Demo</th>
+        <th>После FTD</th>
+        <th>После Full KYC</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Prediction markets</strong> (спорт, техно, погода, киберспорт)</td><td>✅ Видно</td><td>✅ Demo</td><td>✅ Реальные $</td><td>✅ Реальные $</td></tr>
+      <tr><td><strong>Финансовые рынки</strong> (акции, индексы)</td><td>❌</td><td>❌</td><td>✅ Реальные $</td><td>✅ Реальные $</td></tr>
+      <tr><td><strong>Binary Options</strong> (= "Fixed-Time Predictions")</td><td>❌</td><td>❌</td><td>🔒 Виден замок</td><td>✅ Разблокировано</td></tr>
+      <tr><td><strong>FX trading</strong> (= "Currency Market Predictions")</td><td>❌</td><td>❌</td><td>🔒 Виден замок</td><td>✅ Разблокировано</td></tr>
+      <tr><td><strong>Крипто trading</strong> (= "Digital Asset Predictions")</td><td>❌</td><td>❌</td><td>🔒 Виден замок</td><td>✅ Разблокировано</td></tr>
+      <tr><td><strong>Инструменты графика</strong> (линии, индикаторы)</td><td>❌</td><td>❌</td><td>Базовые</td><td>✅ Полные</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-title">Нейминг для прохождения модерации</div>
+  <div style="overflow-x:auto">
+  <table class="comp-table">
+    <thead><tr><th>Реальное название</th><th>В UI продукта</th><th>Причина</th></tr></thead>
+    <tbody>
+      <tr><td>Binary Options</td><td><strong style="color:var(--green)">"Fixed-Time Predictions"</strong></td><td>Не триггерит фильтры рекламных сетей</td></tr>
+      <tr><td>FX Trading</td><td><strong style="color:var(--green)">"Currency Market Predictions"</strong></td><td>Framing как "прогноз", не "торговля"</td></tr>
+      <tr><td>Crypto Trading</td><td><strong style="color:var(--green)">"Digital Asset Predictions"</strong></td><td>Единый визуальный язык с prediction markets</td></tr>
+      <tr><td>Expiry / Strike</td><td><strong style="color:var(--green)">"Resolution Time / Target"</strong></td><td>Нет финансового словаря в первых экранах</td></tr>
+      <tr><td>Pro / Advanced раздел</td><td><strong style="color:var(--green)">"Advanced Instruments" / "Pro Mode"</strong></td><td>Нейтральный, не описывает инструмент явно</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ VARIANT A ══════════════════════════════════════ -->
+<div id="page-va" class="page">
+  <div class="variant-card" style="border-color: rgba(88,166,255,.3)">
+    <div class="variant-header">
+      <div>
+        <div class="variant-name" style="color:var(--blue)">Вариант A — Progressive Disclosure</div>
+        <div class="variant-desc">Твоя идея. Четыре последовательные зоны доступа: от анонимного просмотра до полного функционала. Минимальная сложность разработки, понятная логика для пользователя.</div>
+      </div>
+      <div class="variant-meta">
+        <span class="meta-pill pill-green">⭐ Быстро запустить</span>
+        <span class="meta-pill pill-blue">Прост в реализации</span>
+        <span class="meta-pill pill-yellow">Средний CR2</span>
+      </div>
+    </div>
+    <div class="variant-body">
+      <div class="flow-wrap">
+        <div class="flow">
+
+          <div class="zone zone-grey">
+            <div class="zone-head">
+              <div class="zone-label">Зона 0</div>
+              <div class="zone-title">Unauth</div>
+              <div class="zone-trigger">Что видят модераторы рекламы</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Prediction markets</div>
+              <div class="zone-item available"><span class="dot"></span>⚽ Спорт / Киберспорт</div>
+              <div class="zone-item available"><span class="dot"></span>💻 Технологии</div>
+              <div class="zone-item available"><span class="dot"></span>🌤️ Погода</div>
+              <div class="zone-item available"><span class="dot"></span>Графики вероятностей</div>
+              <div style="height:8px"></div>
+              <div class="zone-item blocked"><span class="dot"></span>Binary / FX / крипто</div>
+              <div class="zone-item blocked"><span class="dot"></span>Торговые инструменты</div>
+              <div class="zone-item blocked"><span class="dot"></span>Ставки (требует входа)</div>
+            </div>
+            <div class="zone-footer">CTA: "Sign up to predict"</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-blue">
+            <div class="zone-head">
+              <div class="zone-label">Зона 1</div>
+              <div class="zone-title">Registered</div>
+              <div class="zone-trigger">После регистрации (Email/Phone)</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Demo-режим (play money)</div>
+              <div class="zone-item available"><span class="dot"></span>Prediction markets</div>
+              <div class="zone-item available"><span class="dot"></span>Все категории</div>
+              <div style="height:8px"></div>
+              <div class="zone-item blocked"><span class="dot"></span>Реальные деньги</div>
+              <div class="zone-item blocked"><span class="dot"></span>Binary / FX / крипто</div>
+            </div>
+            <div class="zone-footer">CTA: "Deposit &amp; play for real"</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-orange">
+            <div class="zone-head">
+              <div class="zone-label">Зона 2</div>
+              <div class="zone-title">FTD Done</div>
+              <div class="zone-trigger">После первого депозита</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Реальные prediction markets</div>
+              <div class="zone-item available"><span class="dot"></span>Все категории событий</div>
+              <div class="zone-item available"><span class="dot"></span>Финансовые рынки (акции)</div>
+              <div style="height:8px"></div>
+              <div class="zone-item locked"><span class="dot"></span>🔒 Pro раздел (замок)</div>
+              <div class="zone-item locked"><span class="dot"></span>🔒 "Verify ID to unlock"</div>
+              <div class="zone-item blocked"><span class="dot"></span>Binary / FX / крипто</div>
+            </div>
+            <div class="zone-footer">CTA: "Complete verification → Pro"</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-green">
+            <div class="zone-head">
+              <div class="zone-label">Зона 3</div>
+              <div class="zone-title">KYC Verified</div>
+              <div class="zone-trigger">После Sumsub (doc + selfie)</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Всё из Зоны 2</div>
+              <div class="zone-item highlight"><span class="dot"></span>Fixed-Time Predictions ✨</div>
+              <div class="zone-item highlight"><span class="dot"></span>Currency Market Predictions</div>
+              <div class="zone-item highlight"><span class="dot"></span>Digital Asset Predictions</div>
+              <div class="zone-item available"><span class="dot"></span>Полные инструменты графика</div>
+              <div class="zone-item available"><span class="dot"></span>Индикаторы, история</div>
+            </div>
+            <div class="zone-footer">🎉 "Pro Forecaster" badge</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ VARIANT B ══════════════════════════════════════ -->
+<div id="page-vb" class="page">
+  <div class="variant-card" style="border-color: rgba(0,200,83,.3)">
+    <div class="variant-header">
+      <div>
+        <div class="variant-name" style="color:var(--green)">Вариант B — KYC Tier Gates</div>
+        <div class="variant-desc">Sumsub тиры как единственный механизм разблокировки. Tier 1 (имя+дата, &lt;1 мин) перед FTD снижает friction. Tier 2 (документ+selfie) открывает Pro-инструменты. Максимальная защита перед рекламными сетями и регуляторами.</div>
+      </div>
+      <div class="variant-meta">
+        <span class="meta-pill pill-green">★★★★★ Защита рекламы</span>
+        <span class="meta-pill pill-green">Sumsub уже есть</span>
+        <span class="meta-pill pill-blue">Регуляторно совместим</span>
+      </div>
+    </div>
+    <div class="variant-body">
+      <div class="flow-wrap">
+        <div class="flow">
+
+          <div class="zone zone-grey">
+            <div class="zone-head">
+              <div class="zone-label">Tier 0</div>
+              <div class="zone-title">Анонимно</div>
+              <div class="zone-trigger">Без аккаунта</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Browse рынков</div>
+              <div class="zone-item available"><span class="dot"></span>Вероятности и статистика</div>
+              <div class="zone-item available"><span class="dot"></span>Категории событий</div>
+              <div style="height:8px"></div>
+              <div class="zone-item blocked"><span class="dot"></span>Ставки / торговля</div>
+              <div class="zone-item blocked"><span class="dot"></span>Binary / FX / крипто</div>
+            </div>
+            <div class="zone-footer">CTA: "Sign up to predict"</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-blue">
+            <div class="zone-head">
+              <div class="zone-label">Tier 1</div>
+              <div class="zone-title">Email + Phone</div>
+              <div class="zone-trigger">Sumsub Basic &lt;1 мин (имя+дата)</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Demo prediction markets</div>
+              <div class="zone-item available"><span class="dot"></span>Лидерборд</div>
+              <div class="zone-item available"><span class="dot"></span>Ранги Forecaster</div>
+              <div style="height:8px"></div>
+              <div class="zone-item blocked"><span class="dot"></span>Реальные деньги</div>
+              <div class="zone-item blocked"><span class="dot"></span>Финансовые рынки</div>
+              <div class="zone-item blocked"><span class="dot"></span>Binary / FX / крипто</div>
+            </div>
+            <div class="zone-footer">Sumsub Tier 1: имя, дата, страна</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-orange">
+            <div class="zone-head">
+              <div class="zone-label">Tier 2</div>
+              <div class="zone-title">FTD</div>
+              <div class="zone-trigger">После первого депозита</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Реальные prediction markets</div>
+              <div class="zone-item available"><span class="dot"></span>Финансовые рынки (акции)</div>
+              <div class="zone-item available"><span class="dot"></span>🇮🇩 OVO / GoPay / Dana</div>
+              <div class="zone-item available"><span class="dot"></span>🇳🇬 Paystack / Flutterwave</div>
+              <div style="height:8px"></div>
+              <div class="zone-item locked"><span class="dot"></span>🔒 Pro раздел</div>
+              <div class="zone-item blocked"><span class="dot"></span>Binary / FX / крипто</div>
+            </div>
+            <div class="zone-footer">CTA: "Verify ID → unlock Pro"</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-green">
+            <div class="zone-head">
+              <div class="zone-label">Tier 3</div>
+              <div class="zone-title">Full KYC</div>
+              <div class="zone-trigger">Sumsub doc + selfie (2-4 мин)</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Всё из Tier 2</div>
+              <div class="zone-item highlight"><span class="dot"></span>Fixed-Time Predictions ✨</div>
+              <div class="zone-item highlight"><span class="dot"></span>Currency Market Predictions</div>
+              <div class="zone-item highlight"><span class="dot"></span>Digital Asset Predictions</div>
+              <div class="zone-item available"><span class="dot"></span>🇮🇩 KTP автопроверка</div>
+              <div class="zone-item available"><span class="dot"></span>🇳🇬 NIN автопроверка</div>
+            </div>
+            <div class="zone-footer">Sumsub: KTP/Passport + selfie</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ VARIANT C ══════════════════════════════════════ -->
+<div id="page-vc" class="page">
+  <div class="variant-card" style="border-color: rgba(188,140,255,.3)">
+    <div class="variant-header">
+      <div>
+        <div class="variant-name" style="color:var(--purple)">Вариант C — Appropriateness Test</div>
+        <div class="variant-desc">После FTD пользователь проходит тест знаний (5-7 вопросов). По результатам получает уровень доступа. Используется eToro, Interactive Brokers. Юридически: пользователь сам декларирует уровень риска и опыт — это снимает ответственность с платформы.</div>
+      </div>
+      <div class="variant-meta">
+        <span class="meta-pill pill-green">★★★★★ Юридическая защита</span>
+        <span class="meta-pill pill-purple" style="color:var(--purple); border-color:rgba(188,140,255,.3); background:var(--purple-dim)">eToro-стандарт</span>
+      </div>
+    </div>
+    <div class="variant-body">
+      <div class="flow-wrap">
+        <div class="flow">
+
+          <div class="zone zone-grey">
+            <div class="zone-head">
+              <div class="zone-label">Зона 0</div>
+              <div class="zone-title">Unauth</div>
+              <div class="zone-trigger">Без аккаунта</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Prediction markets</div>
+              <div class="zone-item available"><span class="dot"></span>Browse + статистика</div>
+              <div style="height:8px"></div>
+              <div class="zone-item blocked"><span class="dot"></span>Ставки / торговля</div>
+            </div>
+            <div class="zone-footer">CTA: "Sign up to predict"</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-blue">
+            <div class="zone-head">
+              <div class="zone-label">Зона 1</div>
+              <div class="zone-title">Registered + FTD</div>
+              <div class="zone-trigger">После первого депозита</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Реальные prediction markets</div>
+              <div style="height:8px"></div>
+              <div class="zone-item highlight"><span class="dot"></span>↓ Тест знаний (5-7 вопросов)</div>
+              <div class="zone-item available" style="font-size:10px; color:var(--muted)"><span class="dot" style="background:transparent"></span>"Что такое бинарный опцион?"</div>
+              <div class="zone-item available" style="font-size:10px; color:var(--muted)"><span class="dot" style="background:transparent"></span>"Ваш опыт торговли?"</div>
+              <div class="zone-item available" style="font-size:10px; color:var(--muted)"><span class="dot" style="background:transparent"></span>"Готовы к потере 100%?"</div>
+            </div>
+            <div class="zone-footer">Sumsub KYC параллельно</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-yellow">
+            <div class="zone-head">
+              <div class="zone-label">Результат А</div>
+              <div class="zone-title">Новичок</div>
+              <div class="zone-trigger">Недостаточно опыта</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Prediction markets</div>
+              <div class="zone-item available"><span class="dot"></span>Образовательный контент</div>
+              <div class="zone-item available"><span class="dot"></span>Demo для Pro-инструментов</div>
+              <div style="height:8px"></div>
+              <div class="zone-item locked"><span class="dot"></span>🔒 Pro — демо-доступ</div>
+              <div class="zone-item blocked"><span class="dot"></span>Binary / FX реальные $</div>
+            </div>
+            <div class="zone-footer">CTA: "Пройди обучение → пересдай"</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-green">
+            <div class="zone-head">
+              <div class="zone-label">Результат Б</div>
+              <div class="zone-title">Опытный</div>
+              <div class="zone-trigger">Декларирует риски → KYC</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Всё из Зоны 1</div>
+              <div class="zone-item highlight"><span class="dot"></span>Fixed-Time Predictions ✨</div>
+              <div class="zone-item highlight"><span class="dot"></span>Currency / Digital Assets</div>
+              <div class="zone-item available"><span class="dot"></span>Полные инструменты</div>
+            </div>
+            <div class="zone-footer">Подписывает декларацию рисков</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ VARIANT D ══════════════════════════════════════ -->
+<div id="page-vd" class="page">
+  <div class="variant-card" style="border-color: rgba(255,140,0,.3)">
+    <div class="variant-header">
+      <div>
+        <div class="variant-name" style="color:var(--orange)">Вариант D — Gamified Engagement Unlock</div>
+        <div class="variant-desc">Бинарные опционы как "награда" за активность. Пользователь проходит уровни Forecaster в демо-режиме, вкладывает время, появляется FOMO — и делает FTD. Особенно эффективен для Индонезии (Mabar-культура) и Нигерии (социальное соревнование).</div>
+      </div>
+      <div class="variant-meta">
+        <span class="meta-pill pill-orange">🇮🇩 Mabar-культура</span>
+        <span class="meta-pill pill-orange">🇳🇬 Social competition</span>
+        <span class="meta-pill pill-green">★★★★★ CR2 потенциал</span>
+        <span class="meta-pill pill-red">⭐⭐⭐ Сложнее разработка</span>
+      </div>
+    </div>
+    <div class="variant-body">
+
+      <div class="flow-wrap">
+        <div class="flow">
+
+          <div class="zone zone-grey">
+            <div class="zone-head">
+              <div class="zone-label">Зона 0</div>
+              <div class="zone-title">Unauth</div>
+              <div class="zone-trigger">Browse-only</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Prediction markets</div>
+              <div class="zone-item available"><span class="dot"></span>Топ предикторы (лидерборд)</div>
+              <div style="height:8px"></div>
+              <div class="zone-item blocked"><span class="dot"></span>Ставки</div>
+            </div>
+            <div class="zone-footer">CTA: "Join &amp; compete"</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-orange" style="width:260px">
+            <div class="zone-head">
+              <div class="zone-label">Зона 1</div>
+              <div class="zone-title">Demo + Уровни</div>
+              <div class="zone-trigger">После регистрации</div>
+            </div>
+            <div class="zone-body">
+              <div class="levels-wrap">
+                <div class="level-row level-1"><span class="level-icon">🥉</span><span class="level-name">NOVICE</span><span class="level-desc">0–100 pts · базовые рынки</span></div>
+                <div class="level-row level-2"><span class="level-icon">🥈</span><span class="level-name">ANALYST</span><span class="level-desc">100–500 pts · статистика, фильтры</span></div>
+                <div class="level-row level-3"><span class="level-icon">🥇</span><span class="level-name">EXPERT</span><span class="level-desc">500–1000 pts · расширенные рынки</span></div>
+                <div class="level-row level-4"><span class="level-icon">🏆</span><span class="level-name">PRO</span><span class="level-desc">1000+ pts + FTD → разблокировка</span></div>
+              </div>
+              <div style="height:6px"></div>
+              <div class="zone-item available"><span class="dot"></span>🇮🇩 Групповые прогнозы (Mabar)</div>
+              <div class="zone-item available"><span class="dot"></span>🇳🇬 Недельные турниры</div>
+            </div>
+            <div class="zone-footer">CTA: "Reach PRO → play for real"</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-green">
+            <div class="zone-head">
+              <div class="zone-label">Зона 2</div>
+              <div class="zone-title">PRO Mode</div>
+              <div class="zone-trigger">FTD + уровень PRO + KYC</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Реальные prediction markets</div>
+              <div class="zone-item highlight"><span class="dot"></span>Fixed-Time Predictions ✨</div>
+              <div class="zone-item highlight"><span class="dot"></span>Currency / Digital Assets</div>
+              <div class="zone-item available"><span class="dot"></span>Полные инструменты</div>
+              <div class="zone-item available"><span class="dot"></span>"PRO Forecaster" badge</div>
+            </div>
+            <div class="zone-footer">🎉 Торжественный анлок</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ VARIANT E ══════════════════════════════════════ -->
+<div id="page-ve" class="page">
+  <div class="variant-card" style="border-color: rgba(255,68,68,.2)">
+    <div class="variant-header">
+      <div>
+        <div class="variant-name" style="color:var(--red)">Вариант E — Dual Brand</div>
+        <div class="variant-desc">Два полностью отдельных продукта. Реклама ведёт только на PredictApp (prediction markets). TradeApp с binary options не рекламируется — доступ только через cross-sell внутри PredictApp после FTD. Абсолютная защита от блокировки рекламы.</div>
+      </div>
+      <div class="variant-meta">
+        <span class="meta-pill pill-green">Абсолютная защита рекламы</span>
+        <span class="meta-pill pill-red">⭐⭐⭐⭐ Очень дорого</span>
+        <span class="meta-pill pill-red">Долго разрабатывать</span>
+      </div>
+    </div>
+    <div class="variant-body">
+      <div class="dual-brand-wrap">
+
+        <div class="dual-brand-col">
+          <div class="dual-brand-label">🟢 Рекламируется</div>
+          <div class="db-box" style="border-color:rgba(0,200,83,.3)">
+            <div class="db-box-head" style="background:rgba(0,200,83,.07)">
+              <div>
+                <div style="font-weight:700; color:var(--green)">PredictApp</div>
+                <div style="font-size:11px; color:var(--muted)">predict.yourdomain.com</div>
+              </div>
+            </div>
+            <div class="db-box-body">
+              <div class="zone-item available" style="margin-bottom:4px"><span class="dot"></span>Prediction markets (спорт, техно, погода)</div>
+              <div class="zone-item available" style="margin-bottom:4px"><span class="dot"></span>Demo-режим</div>
+              <div class="zone-item available" style="margin-bottom:4px"><span class="dot"></span>Лидерборд и геймификация</div>
+              <div class="zone-item available" style="margin-bottom:4px"><span class="dot"></span>После FTD: баннер → TradeApp</div>
+              <div style="height:6px"></div>
+              <div class="zone-item blocked" style="margin-bottom:4px"><span class="dot"></span>Binary / FX / крипто</div>
+              <div style="height:8px"></div>
+              <div style="font-size:10px; color:var(--muted)">Google Ads ✅ (NG) · TikTok ✅ (ID)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="db-arrow-col">
+          <div style="font-size:24px">→</div>
+          <div class="db-arrow-label">Cross-sell<br>только внутри<br>после FTD</div>
+        </div>
+
+        <div class="dual-brand-col">
+          <div class="dual-brand-label">🔴 Не рекламируется</div>
+          <div class="db-box" style="border-color:rgba(255,140,0,.3)">
+            <div class="db-box-head" style="background:rgba(255,140,0,.07)">
+              <div>
+                <div style="font-weight:700; color:var(--orange)">TradeApp</div>
+                <div style="font-size:11px; color:var(--muted)">trade.yourdomain.com</div>
+              </div>
+            </div>
+            <div class="db-box-body">
+              <div class="zone-item available" style="margin-bottom:4px"><span class="dot"></span>Все prediction markets</div>
+              <div class="zone-item highlight" style="margin-bottom:4px"><span class="dot"></span>Fixed-Time Predictions ✨</div>
+              <div class="zone-item highlight" style="margin-bottom:4px"><span class="dot"></span>Currency / Digital Assets</div>
+              <div class="zone-item available" style="margin-bottom:4px"><span class="dot"></span>Полные инструменты графика</div>
+              <div style="height:8px"></div>
+              <div style="font-size:10px; color:var(--muted)">Доступ только через invite из PredictApp</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ RECOMMENDED ══════════════════════════════════════ -->
+<div id="page-vrec" class="page">
+  <div class="variant-card" style="border-color: rgba(0,200,83,.5)">
+    <div class="variant-header">
+      <div>
+        <div class="variant-name" style="color:var(--green)">⭐ Рекомендация: Вариант B+D</div>
+        <div class="variant-desc">Твоя структура A (4 зоны доступа) + Sumsub тиры из B + геймификация из D. Sumsub Tier 1 перед FTD снижает friction, Tier 2 открывает Pro. Уровни Forecaster в демо создают habit loop и FOMO перед депозитом.</div>
+      </div>
+      <div class="variant-meta">
+        <span class="badge-rec">Рекомендуется</span>
+        <span class="meta-pill pill-green">Sumsub уже есть</span>
+        <span class="meta-pill pill-green">Быстрый time to market</span>
+        <span class="meta-pill pill-orange">🇮🇩 Mabar-ready</span>
+        <span class="meta-pill pill-blue">🇳🇬 Google Ads-ready</span>
+      </div>
+    </div>
+    <div class="variant-body">
+      <div class="flow-wrap">
+        <div class="flow">
+
+          <div class="zone zone-grey">
+            <div class="zone-head">
+              <div class="zone-label">Зона 0</div>
+              <div class="zone-title">Unauth</div>
+              <div class="zone-trigger">Что видят модераторы рекламы</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Prediction markets</div>
+              <div class="zone-item available"><span class="dot"></span>⚽ Football / Киберспорт</div>
+              <div class="zone-item available"><span class="dot"></span>💻 Технологии / Погода</div>
+              <div class="zone-item available"><span class="dot"></span>Графики вероятностей</div>
+              <div class="zone-item available"><span class="dot"></span>Топ предикторы (анонс)</div>
+              <div style="height:8px"></div>
+              <div class="zone-item blocked"><span class="dot"></span>Binary / FX / крипто</div>
+              <div class="zone-item blocked"><span class="dot"></span>Ставки (требует входа)</div>
+            </div>
+            <div class="zone-footer">Ad hook: "Predict. Win. Repeat." 🇮🇩 TikTok / 🇳🇬 Google</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-blue" style="width:220px">
+            <div class="zone-head">
+              <div class="zone-label">Зона 1</div>
+              <div class="zone-title">Demo + Levels</div>
+              <div class="zone-trigger">Email/Phone + Sumsub Tier 1</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Demo prediction markets</div>
+              <div style="height:4px"></div>
+              <div class="levels-wrap">
+                <div class="level-row level-1" style="padding:3px 6px"><span class="level-icon" style="font-size:11px">🥉</span><span class="level-name" style="width:60px;font-size:10px">NOVICE</span><span class="level-desc" style="font-size:9px">базовые рынки</span></div>
+                <div class="level-row level-2" style="padding:3px 6px"><span class="level-icon" style="font-size:11px">🥈</span><span class="level-name" style="width:60px;font-size:10px">ANALYST</span><span class="level-desc" style="font-size:9px">статистика</span></div>
+                <div class="level-row level-4" style="padding:3px 6px"><span class="level-icon" style="font-size:11px">🏆</span><span class="level-name" style="width:60px;font-size:10px">PRO</span><span class="level-desc" style="font-size:9px">→ только с реальными $</span></div>
+              </div>
+              <div style="height:6px"></div>
+              <div class="zone-item available"><span class="dot"></span>🇮🇩 Групповые прогнозы</div>
+              <div class="zone-item available"><span class="dot"></span>🇳🇬 Недельный турнир</div>
+            </div>
+            <div class="zone-footer">Sumsub Tier 1: имя+дата (&lt;1 мин)</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-orange">
+            <div class="zone-head">
+              <div class="zone-label">Зона 2</div>
+              <div class="zone-title">FTD</div>
+              <div class="zone-trigger">Первый депозит</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Реальные prediction markets</div>
+              <div class="zone-item available"><span class="dot"></span>Финансовые рынки (акции)</div>
+              <div style="height:4px"></div>
+              <div class="zone-item available" style="font-size:10px"><span class="dot"></span>🇮🇩 OVO / GoPay / Dana</div>
+              <div class="zone-item available" style="font-size:10px"><span class="dot"></span>🇳🇬 Paystack / Flutterwave</div>
+              <div style="height:6px"></div>
+              <div class="zone-item locked"><span class="dot"></span>🔒 Pro Mode</div>
+              <div class="zone-item locked" style="font-size:10px"><span class="dot"></span>"Verify ID to unlock"</div>
+            </div>
+            <div class="zone-footer">Min deposit: IDR 30K / NGN 2000</div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+
+          <div class="zone zone-green">
+            <div class="zone-head">
+              <div class="zone-label">Зона 3</div>
+              <div class="zone-title">PRO Mode</div>
+              <div class="zone-trigger">Sumsub Tier 2 (doc + selfie)</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>Всё из Зоны 2</div>
+              <div class="zone-item highlight"><span class="dot"></span>Fixed-Time Predictions ✨</div>
+              <div class="zone-item highlight"><span class="dot"></span>Currency Market Predictions</div>
+              <div class="zone-item highlight"><span class="dot"></span>Digital Asset Predictions</div>
+              <div class="zone-item available"><span class="dot"></span>Полные инструменты графика</div>
+              <div class="zone-item available"><span class="dot"></span>🇮🇩 KTP / 🇳🇬 NIN auto-check</div>
+            </div>
+            <div class="zone-footer">🎉 "PRO Forecaster" — торжественный анлок</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="note-box" style="margin-top:4px; margin-bottom:0">
+        <strong>Почему это работает для модерации:</strong> Google и Meta нанимают живых ревьюеров, которые проверяют лендинг и первые экраны. Они не создают аккаунт, не делают депозит и не проходят KYC. До Зоны 3 всё выглядит как обычный prediction market.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ COMPARE ══════════════════════════════════════ -->
+<div id="page-compare" class="page">
+  <div class="section-title">Сравнение всех вариантов</div>
+  <div style="overflow-x:auto">
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>Критерий</th>
+        <th>A — Твой</th>
+        <th>B — KYC Tiers</th>
+        <th>C — Тест</th>
+        <th>D — Геймиф.</th>
+        <th>E — Dual Brand</th>
+        <th style="color:var(--green)">⭐ B+D Рек.</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Риск блокировки рекламы</strong></td>
+        <td><span class="dot-yellow"></span> Низкий</td>
+        <td><span class="dot-green"></span> Очень низкий</td>
+        <td><span class="dot-green"></span> Низкий</td>
+        <td><span class="dot-yellow"></span> Низкий</td>
+        <td><span class="dot-green"></span> Минимальный</td>
+        <td><span class="dot-green"></span> <strong>Очень низкий</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Сложность разработки</strong></td>
+        <td>⭐</td>
+        <td>⭐⭐</td>
+        <td>⭐⭐</td>
+        <td>⭐⭐⭐</td>
+        <td>⭐⭐⭐⭐</td>
+        <td><strong>⭐⭐</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Ожидаемый CR2 (reg→FTD)</strong></td>
+        <td><span class="dot-yellow"></span> Средний</td>
+        <td><span class="dot-green"></span> Высокий</td>
+        <td><span class="dot-yellow"></span> Средний</td>
+        <td><span class="dot-green"></span> Высокий</td>
+        <td><span class="dot-green"></span> Высокий</td>
+        <td><span class="dot-green"></span> <strong>Максимальный</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Юридическая защита</strong></td>
+        <td><span class="dot-yellow"></span> Средняя</td>
+        <td><span class="dot-green"></span> Высокая</td>
+        <td><span class="dot-green"></span> Очень высокая</td>
+        <td><span class="dot-yellow"></span> Средняя</td>
+        <td><span class="dot-green"></span> Очень высокая</td>
+        <td><span class="dot-green"></span> <strong>Высокая</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Использует Sumsub</strong></td>
+        <td>Частично</td>
+        <td>✅ Полностью</td>
+        <td>Частично</td>
+        <td>Частично</td>
+        <td>Частично</td>
+        <td>✅ <strong>Полностью</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Без крипто-барьера</strong></td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
+      </tr>
+      <tr>
+        <td><strong>🇮🇩 Mabar (Индонезия)</strong></td>
+        <td><span class="dot-yellow"></span></td>
+        <td><span class="dot-yellow"></span></td>
+        <td><span class="dot-yellow"></span></td>
+        <td><span class="dot-green"></span> Нативно</td>
+        <td><span class="dot-yellow"></span></td>
+        <td><span class="dot-green"></span> <strong>Нативно</strong></td>
+      </tr>
+      <tr>
+        <td><strong>🇳🇬 Google Ads (Нигерия)</strong></td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>✅</td>
+      </tr>
+      <tr>
+        <td><strong>Mobile app friendly</strong></td>
+        <td>✅</td>
+        <td>✅ Sumsub SDK</td>
+        <td>✅</td>
+        <td>✅</td>
+        <td>⚠️ Два приложения</td>
+        <td>✅ <strong>Sumsub SDK</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Time to market</strong></td>
+        <td>🚀 Быстро</td>
+        <td>🚀 Быстро</td>
+        <td>⚡ Средне</td>
+        <td>🐢 Долго</td>
+        <td>🐢 Очень долго</td>
+        <td>⚡ <strong>Средне</strong></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<script>
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

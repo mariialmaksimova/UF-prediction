@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CJM — Prediction Markets Platform</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+  --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+  --green: #00c853; --green-dim: rgba(0,200,83,0.12);
+  --red: #ff4444; --red-dim: rgba(255,68,68,0.12);
+  --blue: #58a6ff; --orange: #ff8c00; --yellow: #ffd700; --cyan: #4fc3f7;
+  --id: #ff8c00; --in: #4fc3f7; --br: #ffd700;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 13px; }
+
+/* HEADER */
+.header { background: rgba(13,17,23,0.97); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+.logo { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.header-sub { font-size: 11px; color: var(--muted); }
+
+/* TABS */
+.tab-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 2px; position: sticky; top: 57px; z-index: 99; }
+.tab-group { display: flex; gap: 2px; align-items: center; }
+.tab-divider { width: 1px; height: 24px; background: var(--border); margin: 0 8px; }
+.tab { padding: 10px 16px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; }
+.tab:hover { color: var(--text); }
+.tab.active-info { color: var(--blue); border-bottom-color: var(--blue); }
+.tab.active-cjm { color: var(--green); border-bottom-color: var(--green); }
+
+/* CONTENT */
+.tab-content { display: none; padding: 24px; }
+.tab-content.active { display: block; }
+
+/* CARDS ROW */
+.cards-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+.metric-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 160px; }
+.metric-card .val { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.metric-card .label { font-size: 11px; color: var(--muted); }
+.metric-card .sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.card-green .val { color: var(--green); }
+.card-orange .val { color: var(--orange); }
+.card-blue .val { color: var(--blue); }
+.card-yellow .val { color: var(--yellow); }
+
+/* SECTION */
+.section { margin-bottom: 28px; }
+.section-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* TABLE */
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th { background: var(--bg3); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: .5px; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.data-table td { padding: 9px 12px; border-bottom: 1px solid rgba(48,54,61,.5); vertical-align: middle; }
+.data-table tr:hover td { background: var(--bg2); }
+.data-table tr:last-child td { border-bottom: none; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+.badge-pred { background: rgba(0,200,83,.15); color: var(--green); }
+.badge-bin { background: rgba(255,140,0,.15); color: var(--orange); }
+.badge-inv { background: rgba(88,166,255,.15); color: var(--blue); }
+.threat-high { background: rgba(255,68,68,.2); color: var(--red); }
+.threat-med { background: rgba(255,215,0,.15); color: var(--yellow); }
+.threat-low { background: rgba(139,148,158,.15); color: var(--muted); }
+.prio-1 { color: var(--green); font-weight: 700; }
+.prio-2 { color: var(--yellow); font-weight: 600; }
+.prio-3 { color: var(--muted); }
+
+/* GEO GRID */
+.geo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.geo-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.geo-card-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+.kv-list { display: flex; flex-direction: column; gap: 6px; }
+.kv-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; font-size: 12px; }
+.kv-key { color: var(--muted); flex-shrink: 0; }
+.kv-val { color: var(--text); text-align: right; font-weight: 500; }
+.highlight-val { font-size: 13px; font-weight: 700; }
+
+/* OVERLAP CARDS */
+.overlap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.overlap-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.overlap-title { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.overlap-platforms { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.overlap-tag { font-size: 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 2px 7px; color: var(--text); }
+.overlap-total { font-size: 16px; font-weight: 700; color: var(--blue); }
+.overlap-total-label { font-size: 10px; color: var(--muted); }
+
+/* AD TABLE */
+.ad-row-yes { color: var(--green); font-weight: 600; }
+.ad-row-no { color: var(--red); }
+.ad-row-grey { color: var(--yellow); }
+
+/* PERSONA HEADER */
+.persona-header { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 24px; }
+.persona-avatar { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; border: 2px solid; }
+.persona-name { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+.persona-geo { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.persona-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.persona-tag { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 3px 10px; font-size: 11px; color: var(--muted); }
+.persona-metrics { margin-left: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex-shrink: 0; }
+.persona-metric { text-align: center; }
+.persona-metric .pm-val { font-size: 16px; font-weight: 700; }
+.persona-metric .pm-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* CJM TABLE */
+.cjm-wrapper { overflow-x: auto; margin-bottom: 24px; }
+.cjm-table { display: grid; grid-template-columns: 110px repeat(7, minmax(200px, 1fr)); min-width: 1510px; }
+.row-label { position: sticky; left: 0; background: var(--bg); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 12px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; z-index: 5; }
+.stage-head { background: var(--bg2); border-right: 1px solid var(--border); border-bottom: 2px solid var(--border); padding: 12px 14px; }
+.stage-num { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+.stage-name { font-size: 13px; font-weight: 700; }
+.stage-name-ru { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.cell { padding: 10px 12px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); transition: background .15s; }
+.cell:hover { background: var(--bg2); }
+.action-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.action-list li { font-size: 11px; color: var(--text); padding-left: 12px; position: relative; line-height: 1.4; }
+.action-list li::before { content: '→'; position: absolute; left: 0; color: var(--muted); font-size: 10px; }
+.tp-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+.tp { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 2px 7px; font-size: 10px; color: var(--muted); }
+.em-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-bottom: 3px; }
+.em-pos { background:rgba(0,200,83,.15); color:var(--green); border:1px solid rgba(0,200,83,.3); }
+.em-neu { background:rgba(139,148,158,.15); color:var(--muted); border:1px solid rgba(139,148,158,.3); }
+.em-neg { background:rgba(255,68,68,.15); color:var(--red); border:1px solid rgba(255,68,68,.3); }
+.em-peak { background:rgba(0,200,83,.25); color:#00e676; border:1px solid rgba(0,200,83,.5); }
+.em-crisis { background:rgba(255,68,68,.25); color:#ff6b6b; border:1px solid rgba(255,68,68,.5); }
+.em-desc { font-size: 10px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+.metrics-stack { display: flex; flex-direction: column; gap: 4px; }
+.mpill { display: inline-block; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-size: 10px; color: var(--muted); margin: 1px; }
+.mpill strong { color: var(--text); }
+.mpill-hl { border-color: rgba(0,200,83,.4); color: var(--green); }
+.mpill-hl strong { color: var(--green); }
+.mpill-warn { border-color: rgba(255,68,68,.4); color: var(--red); }
+.expandable { cursor: pointer; user-select: none; }
+.exp-hd { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; padding: 3px 0; margin-bottom: 3px; }
+.exp-hd.pain { color: var(--red); }
+.exp-hd.opp { color: var(--green); }
+.exp-icon { font-size: 8px; transition: transform .2s; color: var(--muted); }
+.exp-icon.open { transform: rotate(90deg); }
+.exp-body { display: none; flex-direction: column; gap: 3px; }
+.exp-body.vis { display: flex; }
+.pain-item { font-size: 10px; line-height: 1.4; padding: 3px 7px; border-radius: 5px; background: var(--red-dim); border-left: 2px solid var(--red); color: #ffaaaa; }
+.opp-item { font-size: 10px; line-height: 1.4; padding: 3px 7px; border-radius: 5px; background: var(--green-dim); border-left: 2px solid var(--green); color: #aaeebb; }
+
+/* EMOTION CURVE */
+.curve-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; }
+#emotion-svg { width: 100%; height: 140px; overflow: visible; }
+.curve-labels { display: grid; grid-template-columns: repeat(7,1fr); gap: 0; margin-top: 6px; padding: 0 5%; }
+.curve-lbl { text-align: center; font-size: 10px; color: var(--muted); }
+.curve-lbl strong { display: block; color: var(--text); font-size: 11px; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { height: 5px; width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo"><span class="logo-dot"></span> Prediction Markets — Research & CJM</div>
+    <div class="header-sub">Мужчины 25–34 · 🇮🇩 Индонезия · 🇮🇳 Индия · 🇧🇷 Бразилия · Март 2026</div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab-group">
+    <button class="tab active-info" onclick="showTab('market',this)">📊 Общий рынок</button>
+    <button class="tab" onclick="showTab('geo-id',this)">🇮🇩 Индонезия</button>
+    <button class="tab" onclick="showTab('geo-in',this)">🇮🇳 Индия</button>
+    <button class="tab" onclick="showTab('geo-br',this)">🇧🇷 Бразилия</button>
+  </div>
+  <div class="tab-divider"></div>
+  <div class="tab-group">
+    <button class="tab" onclick="showTab('cjm-id',this)">👤 Andi (CJM)</button>
+    <button class="tab" onclick="showTab('cjm-in',this)">👤 Arjun (CJM)</button>
+    <button class="tab" onclick="showTab('cjm-br',this)">👤 Lucas (CJM)</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAB: РЫНОК
+══════════════════════════════════════ -->
+<div id="tab-market" class="tab-content active">
+
+  <div class="section">
+    <div class="section-title">TAM & Market Size</div>
+    <div class="cards-row">
+      <div class="metric-card card-green"><div class="val">~165M</div><div class="label">Мужчины 25–34 (ID+IN+BR)</div></div>
+      <div class="metric-card card-blue"><div class="val">&gt;$157B</div><div class="label">Совокупный рынок</div></div>
+      <div class="metric-card card-orange"><div class="val">$56.8B</div><div class="label">🇮🇩 Индонезия</div><div class="sub">нелегальный, 2025</div></div>
+      <div class="metric-card card-blue"><div class="val">$100B</div><div class="label">🇮🇳 Индия</div><div class="sub">нелегальный, 2025</div></div>
+      <div class="metric-card card-yellow"><div class="val">Regulated</div><div class="label">🇧🇷 Бразилия</div><div class="sub">легально с 2025</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Конкуренты — трафик (SimilarWeb, Nov 2025–Jan 2026)</div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Платформа</th><th>Визиты/мес</th><th>Desktop</th><th>Mobile</th><th>Тип</th><th>Целевые ГЕО</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Polymarket</strong></td><td>39.91M</td><td>43.77%</td><td>56.23%</td><td><span class="badge badge-pred">Prediction</span></td><td>IN 6.08% · ID 1.27% · BR 1.27%</td></tr>
+        <tr><td><strong>Robinhood</strong></td><td>21.41M</td><td>~81%</td><td>~19%</td><td><span class="badge badge-inv">Investing</span></td><td>IN 0.52% · ID 0.09%</td></tr>
+        <tr><td><strong>Kalshi</strong></td><td>12.39M</td><td>51.52%</td><td>48.48%</td><td><span class="badge badge-pred">Prediction</span></td><td>IN 1.28% · BR 0.68% · ID 0.41%</td></tr>
+        <tr><td><strong>OlympTrade</strong></td><td>2.835M</td><td>31.46%</td><td>68.54%</td><td><span class="badge badge-bin">Binary</span></td><td>IN 40.57% · ID 4.13% · BR 3.81%</td></tr>
+        <tr><td><strong>Binomo</strong></td><td>1.530M</td><td>~35%</td><td>~65%</td><td><span class="badge badge-bin">Binary</span></td><td>развивающиеся рынки</td></tr>
+        <tr><td><strong>OpinionTrade</strong></td><td>124K</td><td>88.66%</td><td>11.34%</td><td><span class="badge badge-pred">Prediction</span></td><td>HK · UA · PL · JP · IN 4.17%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Демография конкурентов (Gender / Age)</div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Платформа</th><th>Male %</th><th>Female %</th><th>Пиковый возраст</th><th>Комментарий</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Polymarket</strong></td><td>72.11%</td><td>27.89%</td><td>25–34</td><td>Crypto-native, глобальные события</td></tr>
+        <tr><td><strong>Kalshi</strong></td><td>72.55%</td><td>27.45%</td><td>25–34</td><td>US-ориентированный, регулируемый</td></tr>
+        <tr><td><strong>Robinhood</strong></td><td>65.67%</td><td>34.33%</td><td>25–34</td><td>Наибольшая доля женщин</td></tr>
+        <tr><td><strong>OlympTrade</strong></td><td>78.18%</td><td>21.82%</td><td>25–34</td><td>Развивающиеся рынки, mobile-first</td></tr>
+        <tr><td><strong>Binomo</strong></td><td>74.43%</td><td>25.57%</td><td>25–34</td><td>Схожая аудитория с OlympTrade</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Пересечения аудиторий (Audience Overlap, Feb 2026)</div>
+    <div class="overlap-grid">
+      <div class="overlap-card">
+        <div class="overlap-title">Prediction markets + Binary</div>
+        <div class="overlap-platforms">
+          <span class="overlap-tag">polymarket</span><span class="overlap-tag">olymptrade</span><span class="overlap-tag">kalshi</span><span class="overlap-tag">binomo</span>
+        </div>
+        <div class="overlap-total">5.84M</div>
+        <div class="overlap-total-label">Total Unique Audience</div>
+      </div>
+      <div class="overlap-card">
+        <div class="overlap-title">Prediction + Sports betting</div>
+        <div class="overlap-platforms">
+          <span class="overlap-tag">polymarket</span><span class="overlap-tag">dream11</span><span class="overlap-tag">olymptrade</span><span class="overlap-tag">1xbet</span><span class="overlap-tag">betwinner</span>
+        </div>
+        <div class="overlap-total">13.00M</div>
+        <div class="overlap-total-label">Total Unique Audience</div>
+      </div>
+      <div class="overlap-card">
+        <div class="overlap-title">Binary + Brokers</div>
+        <div class="overlap-platforms">
+          <span class="overlap-tag">binomo</span><span class="overlap-tag">olymptrade</span><span class="overlap-tag">qxbroker</span><span class="overlap-tag">pocketoption</span><span class="overlap-tag">zerodha</span>
+        </div>
+        <div class="overlap-total">15.91M</div>
+        <div class="overlap-total-label">Total Unique Audience</div>
+      </div>
+      <div class="overlap-card">
+        <div class="overlap-title">Prediction vs Opinion</div>
+        <div class="overlap-platforms">
+          <span class="overlap-tag">polymarket</span><span class="overlap-tag">qxbroker</span><span class="overlap-tag">app.opinion.trade</span>
+        </div>
+        <div class="overlap-total">15.78M</div>
+        <div class="overlap-total-label">Total Unique Audience</div>
+      </div>
+      <div class="overlap-card">
+        <div class="overlap-title">Sports betting cluster</div>
+        <div class="overlap-platforms">
+          <span class="overlap-tag">kalshi</span><span class="overlap-tag">22bet</span><span class="overlap-tag">bet365</span><span class="overlap-tag">olymptrade</span>
+        </div>
+        <div class="overlap-total">10.86M</div>
+        <div class="overlap-total-label">Total Unique Audience</div>
+      </div>
+      <div class="overlap-card">
+        <div class="overlap-title">🇮🇩 Crypto/ID аудитория</div>
+        <div class="overlap-platforms">
+          <span class="overlap-tag">tokocrypto</span><span class="overlap-tag">olymptrade</span><span class="overlap-tag">polymarket</span>
+        </div>
+        <div class="overlap-total" style="color:var(--red)">~0%</div>
+        <div class="overlap-total-label">пересечение крайне мало</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Рекламные возможности по ГЕО</div>
+    <table class="data-table">
+      <thead><tr><th>ГЕО</th><th>TikTok Ads</th><th>Google Ads</th><th>Приоритет</th><th>Провайдеры</th></tr></thead>
+      <tbody>
+        <tr><td>🇮🇩 Индонезия</td><td class="ad-row-yes">✅ APAC Markets</td><td class="ad-row-no">❌ Restricted</td><td class="prio-1">#1</td><td>да</td></tr>
+        <tr><td>🇻🇳 Вьетнам</td><td class="ad-row-yes">✅ APAC Markets</td><td class="ad-row-no">❌ Illegal</td><td class="prio-1">#1</td><td>да</td></tr>
+        <tr><td>🇳🇬 Нигерия</td><td class="ad-row-no">—</td><td class="ad-row-yes">✅ Permitted</td><td class="prio-1">#1</td><td>да</td></tr>
+        <tr><td>🇹🇭 Таиланд</td><td class="ad-row-yes">✅ APAC Markets</td><td class="ad-row-yes">✅ G2RS</td><td class="prio-2">#2</td><td>легко</td></tr>
+        <tr><td>🇻🇪 Венесуэла</td><td class="ad-row-no">—</td><td class="ad-row-grey">✅ серый</td><td class="prio-2">#2</td><td>да</td></tr>
+        <tr><td>🇨🇴 Колумбия</td><td class="ad-row-no">—</td><td class="ad-row-yes">✅ Permitted</td><td class="prio-2">#2</td><td>да</td></tr>
+        <tr><td>🇮🇳 Индия</td><td class="ad-row-no">❌</td><td class="ad-row-no">❌ Restricted</td><td class="prio-3">#3</td><td>да</td></tr>
+        <tr><td>🇧🇷 Бразилия</td><td class="ad-row-no">❌</td><td class="ad-row-yes">✅ Permitted</td><td class="prio-3">#3</td><td>да</td></tr>
+        <tr><td>🇲🇾 Малайзия</td><td class="ad-row-yes">✅ APAC Markets</td><td class="ad-row-yes">✅ G2RS</td><td class="prio-3">#3</td><td>да</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAB: ИНДОНЕЗИЯ
+══════════════════════════════════════ -->
+<div id="tab-geo-id" class="tab-content">
+  <div class="cards-row">
+    <div class="metric-card card-orange"><div class="val">21.7M</div><div class="label">Мужчины 25–34</div></div>
+    <div class="metric-card"><div class="val">$56.8B</div><div class="label">Объём рынка (2025)</div><div class="sub">нелегальный, серый</div></div>
+    <div class="metric-card card-green"><div class="val">Excitement</div><div class="label">Главная мотивация</div><div class="sub">41% · деньги 33%</div></div>
+    <div class="metric-card"><div class="val">Серый</div><div class="label">Правовой статус</div><div class="sub">незаконно, но активный</div></div>
+  </div>
+
+  <div class="geo-grid">
+    <div class="geo-card">
+      <div class="geo-card-title">Социально-экономический профиль</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">Средний класс</span><span class="kv-val">45–52%</span></div>
+        <div class="kv-row"><span class="kv-key">Высшее образование</span><span class="kv-val">68%</span></div>
+        <div class="kv-row"><span class="kv-key">Работающие</span><span class="kv-val">69%</span></div>
+        <div class="kv-row"><span class="kv-key">Частный сектор</span><span class="kv-val">34%</span></div>
+        <div class="kv-row"><span class="kv-key">Предприниматели</span><span class="kv-val">20%</span></div>
+        <div class="kv-row"><span class="kv-key">Женатые с детьми</span><span class="kv-val">89%</span></div>
+      </div>
+    </div>
+    <div class="geo-card">
+      <div class="geo-card-title">Цифровое поведение</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">Без интернета не могут</span><span class="kv-val">92%</span></div>
+        <div class="kv-row"><span class="kv-key">Instagram (покупки)</span><span class="kv-val highlight-val" style="color:var(--orange)">81.7%</span></div>
+        <div class="kv-row"><span class="kv-key">YouTube (развлечения)</span><span class="kv-val">40.5%</span></div>
+        <div class="kv-row"><span class="kv-key">TikTok (покупки)</span><span class="kv-val">19.7%</span></div>
+        <div class="kv-row"><span class="kv-key">Доп. доход (подработки)</span><span class="kv-val">43%</span></div>
+        <div class="kv-row"><span class="kv-key">Ведут бюджет</span><span class="kv-val">39%</span></div>
+      </div>
+    </div>
+    <div class="geo-card">
+      <div class="geo-card-title">🎮 Феномен «Mabar» (Main Bareng)</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">Смысл</span><span class="kv-val">«играть вместе» — замена барам</span></div>
+        <div class="kv-row"><span class="kv-key">Voice chat</span><span class="kv-val">2+ часа = prime time</span></div>
+        <div class="kv-row"><span class="kv-key">Популярные спорт</span><span class="kv-val">Футбол, бадминтон, esports</span></div>
+        <div class="kv-row"><span class="kv-key">Opportunity</span><span class="kv-val" style="color:var(--green)">Group betting «Mabar mode»</span></div>
+      </div>
+    </div>
+    <div class="geo-card">
+      <div class="geo-card-title">Industry Benchmarks</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">CR1 (Visit→Reg)</span><span class="kv-val highlight-val">10.3%</span></div>
+        <div class="kv-row"><span class="kv-key">CR2 (Reg→FTD)</span><span class="kv-val highlight-val">27.6%</span></div>
+        <div class="kv-row"><span class="kv-key">CAC</span><span class="kv-val highlight-val">$34</span></div>
+        <div class="kv-row"><span class="kv-key">FTD (avg)</span><span class="kv-val highlight-val">$14.44</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Конкуренты в Индонезии</div>
+    <table class="data-table">
+      <thead><tr><th>Платформа</th><th>Тип</th><th>Визиты из ID</th><th>Особенность</th><th>Угроза</th></tr></thead>
+      <tbody>
+        <tr><td><strong>OlympTrade</strong></td><td><span class="badge badge-bin">Binary</span></td><td>72.9K (4.13%)</td><td>Mobile-first, низкий порог входа</td><td><span class="badge threat-high">Высокая</span></td></tr>
+        <tr><td><strong>1xBet</strong></td><td><span class="badge badge-bin">Sports</span></td><td>—</td><td>IDR/OVO, live esports (Mobile Legends)</td><td><span class="badge threat-high">Высокая</span></td></tr>
+        <tr><td><strong>Megapari</strong></td><td><span class="badge badge-bin">Sports</span></td><td>—</td><td>Esports, live betting</td><td><span class="badge threat-med">Средняя</span></td></tr>
+        <tr><td><strong>22Bet</strong></td><td><span class="badge badge-bin">Sports</span></td><td>—</td><td>Mobile Legends аудитория</td><td><span class="badge threat-med">Средняя</span></td></tr>
+        <tr><td><strong>Polymarket</strong></td><td><span class="badge badge-pred">Prediction</span></td><td>488K (1.27%)</td><td>Крипто-барьер, нет локализации</td><td><span class="badge threat-low">Слабая</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Рекламные возможности</div>
+    <div class="cards-row">
+      <div class="metric-card card-green"><div class="val">✅ TikTok</div><div class="label">APAC Markets</div><div class="sub">доступно</div></div>
+      <div class="metric-card" style="border-color:rgba(255,68,68,.3)"><div class="val" style="color:var(--red)">❌ Google</div><div class="label">Restricted</div><div class="sub">недоступно</div></div>
+      <div class="metric-card card-orange"><div class="val">#1</div><div class="label">Приоритет ГЕО</div><div class="sub">оптимальный баланс</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAB: ИНДИЯ
+══════════════════════════════════════ -->
+<div id="tab-geo-in" class="tab-content">
+  <div class="cards-row">
+    <div class="metric-card card-blue"><div class="val">126.5M</div><div class="label">Мужчины 25–34</div></div>
+    <div class="metric-card"><div class="val">$100B</div><div class="label">Объём рынка (2025)</div><div class="sub">нелегальный</div></div>
+    <div class="metric-card card-green"><div class="val">Thrill/Social</div><div class="label">Главная мотивация</div></div>
+    <div class="metric-card"><div class="val">Незаконно</div><div class="label">Правовой статус</div><div class="sub">кроме horse racing</div></div>
+  </div>
+
+  <div class="geo-grid">
+    <div class="geo-card">
+      <div class="geo-card-title">Социально-экономический профиль</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">Средний класс</span><span class="kv-val">40–45% (растёт)</span></div>
+        <div class="kv-row"><span class="kv-key">Трудоспособный возраст</span><span class="kv-val">68.4%</span></div>
+        <div class="kv-row"><span class="kv-key">Фокус</span><span class="kv-val">IT и услуги</span></div>
+        <div class="kv-row"><span class="kv-key">Бюджетирование</span><span class="kv-val">58%</span></div>
+        <div class="kv-row"><span class="kv-key">Приоритет инвестиций</span><span class="kv-val">38% (Zerodha, Groww)</span></div>
+        <div class="kv-row"><span class="kv-key">Фриланс</span><span class="kv-val">растущий тренд</span></div>
+      </div>
+    </div>
+    <div class="geo-card">
+      <div class="geo-card-title">Платежи и цифровое поведение</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">UPI</span><span class="kv-val highlight-val" style="color:var(--blue)">интегрирован в жизнь</span></div>
+        <div class="kv-row"><span class="kv-key">Micro-investing</span><span class="kv-val">популярно у миллениалов</span></div>
+        <div class="kv-row"><span class="kv-key">Fantasy sports</span><span class="kv-val">Dream11, 370M IPL users</span></div>
+        <div class="kv-row"><span class="kv-key">Популярный спорт</span><span class="kv-val">Крикет/IPL (пик), футбол</span></div>
+        <div class="kv-row"><span class="kv-key">Легальная альтернатива</span><span class="kv-val">Fantasy sports (Dream11)</span></div>
+      </div>
+    </div>
+    <div class="geo-card">
+      <div class="geo-card-title">Industry Benchmarks</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">CR1 (Visit→Reg)</span><span class="kv-val highlight-val" style="color:var(--green)">12.6% 🔥</span></div>
+        <div class="kv-row"><span class="kv-key">CR2 (Reg→FTD)</span><span class="kv-val highlight-val">11.2%</span></div>
+        <div class="kv-row"><span class="kv-key">CAC</span><span class="kv-val highlight-val" style="color:var(--green)">$4 🔥</span></div>
+        <div class="kv-row"><span class="kv-key">FTD (avg)</span><span class="kv-val highlight-val">$18</span></div>
+      </div>
+    </div>
+    <div class="geo-card">
+      <div class="geo-card-title">⚠️ Ключевые риски</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">Биллинг</span><span class="kv-val" style="color:var(--red)">серьёзный фин. мониторинг</span></div>
+        <div class="kv-row"><span class="kv-key">Фрод</span><span class="kv-val" style="color:var(--red)">много фродеров</span></div>
+        <div class="kv-row"><span class="kv-key">Платежи</span><span class="kv-val" style="color:var(--red)">нет UPI-интеграции</span></div>
+        <div class="kv-row"><span class="kv-key">Конверсия в депозит</span><span class="kv-val" style="color:var(--yellow)">CR2 низкий (11.2%)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Конкуренты в Индии</div>
+    <table class="data-table">
+      <thead><tr><th>Платформа</th><th>Тип</th><th>Визиты из IN</th><th>Особенность</th><th>Угроза</th></tr></thead>
+      <tbody>
+        <tr><td><strong>OlympTrade</strong></td><td><span class="badge badge-bin">Binary</span></td><td><strong style="color:var(--red)">716K = 40% трафика!</strong></td><td>Доминирует в Индии</td><td><span class="badge threat-high">Критическая</span></td></tr>
+        <tr><td><strong>Dream11</strong></td><td><span class="badge badge-inv">Fantasy</span></td><td>370M IPL users</td><td>Легальная альтернатива</td><td><span class="badge threat-high">Высокая</span></td></tr>
+        <tr><td><strong>Polymarket</strong></td><td><span class="badge badge-pred">Prediction</span></td><td>2.33M (6.08%)</td><td>#2 рынок, без локализации</td><td><span class="badge threat-med">Средняя</span></td></tr>
+        <tr><td><strong>Betwinner</strong></td><td><span class="badge badge-bin">Sports</span></td><td>—</td><td>Крикет/UPI</td><td><span class="badge threat-med">Средняя</span></td></tr>
+        <tr><td><strong>Zerodha/Groww</strong></td><td><span class="badge badge-inv">Investing</span></td><td>—</td><td>Micro-investing overlap</td><td><span class="badge threat-med">Средняя</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Рекламные возможности</div>
+    <div class="cards-row">
+      <div class="metric-card" style="border-color:rgba(255,68,68,.3)"><div class="val" style="color:var(--red)">❌ TikTok</div><div class="label">недоступно</div></div>
+      <div class="metric-card" style="border-color:rgba(255,68,68,.3)"><div class="val" style="color:var(--red)">❌ Google</div><div class="label">Restricted</div></div>
+      <div class="metric-card"><div class="val">#3</div><div class="label">Приоритет</div><div class="sub">огромный потенциал, но сложно</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAB: БРАЗИЛИЯ
+══════════════════════════════════════ -->
+<div id="tab-geo-br" class="tab-content">
+  <div class="cards-row">
+    <div class="metric-card card-yellow"><div class="val">15.9M</div><div class="label">Мужчины 25–34</div></div>
+    <div class="metric-card"><div class="val">Regulated</div><div class="label">Правовой статус</div><div class="sub">легально с 2025</div></div>
+    <div class="metric-card card-green"><div class="val">72%</div><div class="label">Ставят «for fun»</div></div>
+    <div class="metric-card"><div class="val">38%</div><div class="label">Ставят для дохода</div></div>
+  </div>
+
+  <div class="geo-grid">
+    <div class="geo-card">
+      <div class="geo-card-title">Социально-экономический профиль</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">Средний класс</span><span class="kv-val">50–55%</span></div>
+        <div class="kv-row"><span class="kv-key">Занятость</span><span class="kv-val">услуги и промышленность</span></div>
+        <div class="kv-row"><span class="kv-key">Популярный спорт</span><span class="kv-val">Футбол (Flamengo), пляж</span></div>
+        <div class="kv-row"><span class="kv-key">Спорт в культуре</span><span class="kv-val">18% ставят за команду</span></div>
+        <div class="kv-row"><span class="kv-key">Tech для финансов</span><span class="kv-val">88%</span></div>
+      </div>
+    </div>
+    <div class="geo-card">
+      <div class="geo-card-title">Платежи и цифровое поведение</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">Pix</span><span class="kv-val highlight-val" style="color:var(--yellow)">мгновенные переводы</span></div>
+        <div class="kv-row"><span class="kv-key">Отзовики</span><span class="kv-val" style="color:var(--red)">культура ORM, изучают отзывы</span></div>
+        <div class="kv-row"><span class="kv-key">Статьи/опыт других</span><span class="kv-val">активно изучают</span></div>
+        <div class="kv-row"><span class="kv-key">Основные города</span><span class="kv-val">Сан-Паулу, Рио, Бразилиа</span></div>
+      </div>
+    </div>
+    <div class="geo-card">
+      <div class="geo-card-title">Industry Benchmarks</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">CR1 (Visit→Reg)</span><span class="kv-val highlight-val" style="color:var(--red)">4%</span></div>
+        <div class="kv-row"><span class="kv-key">CR2 (Reg→FTD)</span><span class="kv-val highlight-val">25.2%</span></div>
+        <div class="kv-row"><span class="kv-key">CAC</span><span class="kv-val highlight-val" style="color:var(--red)">$87</span></div>
+        <div class="kv-row"><span class="kv-key">FTD (avg)</span><span class="kv-val highlight-val">$25.20</span></div>
+      </div>
+    </div>
+    <div class="geo-card">
+      <div class="geo-card-title">⚠️ Ключевые риски</div>
+      <div class="kv-list">
+        <div class="kv-row"><span class="kv-key">ORM</span><span class="kv-val" style="color:var(--red)">нужна стратегия отзывов</span></div>
+        <div class="kv-row"><span class="kv-key">CAC</span><span class="kv-val" style="color:var(--red)">$87 — самый высокий</span></div>
+        <div class="kv-row"><span class="kv-key">CR1</span><span class="kv-val" style="color:var(--red)">4% — самый низкий</span></div>
+        <div class="kv-row"><span class="kv-key">Без Pix</span><span class="kv-val" style="color:var(--yellow)">барьер для депозита</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Конкуренты в Бразилии</div>
+    <table class="data-table">
+      <thead><tr><th>Платформа</th><th>Тип</th><th>Визиты из BR</th><th>Особенность</th><th>Угроза</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bet365</strong></td><td><span class="badge badge-bin">Sports</span></td><td>—</td><td>Flamengo-аудитория, Pix</td><td><span class="badge threat-high">Высокая</span></td></tr>
+        <tr><td><strong>OlympTrade</strong></td><td><span class="badge badge-bin">Binary</span></td><td>67.2K (3.81%)</td><td>Mobile-first</td><td><span class="badge threat-high">Высокая</span></td></tr>
+        <tr><td><strong>Polymarket</strong></td><td><span class="badge badge-pred">Prediction</span></td><td>488K (1.27%)</td><td>Крипто-барьер</td><td><span class="badge threat-med">Средняя</span></td></tr>
+        <tr><td><strong>Kalshi</strong></td><td><span class="badge badge-pred">Prediction</span></td><td>72.6K (0.68%)</td><td>US-ориентирован</td><td><span class="badge threat-low">Слабая</span></td></tr>
+        <tr><td><strong>22Bet</strong></td><td><span class="badge badge-bin">Sports</span></td><td>—</td><td>Pix интеграция</td><td><span class="badge threat-med">Средняя</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Рекламные возможности</div>
+    <div class="cards-row">
+      <div class="metric-card" style="border-color:rgba(255,68,68,.3)"><div class="val" style="color:var(--red)">❌ TikTok</div><div class="label">недоступно</div></div>
+      <div class="metric-card card-green"><div class="val">✅ Google</div><div class="label">Permitted</div></div>
+      <div class="metric-card"><div class="val">#3</div><div class="label">Приоритет</div><div class="sub">качественный трафик, но дорого</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAB: CJM ANDI 🇮🇩
+══════════════════════════════════════ -->
+<div id="tab-cjm-id" class="tab-content">
+  <div class="persona-header" style="border-color:rgba(255,140,0,.3)">
+    <div class="persona-avatar" style="border-color:var(--id); background:rgba(255,140,0,.1)">👨</div>
+    <div>
+      <div class="persona-name" style="color:var(--id)">Andi</div>
+      <div class="persona-geo">🇮🇩 Индонезия · Мужчина 25–34 · Джакарта/Сурабая</div>
+      <div class="persona-tags">
+        <span class="persona-tag">Excitement 41%</span>
+        <span class="persona-tag">Mabar-культура</span>
+        <span class="persona-tag">Instagram 81.7%</span>
+        <span class="persona-tag">Средний класс 45–52%</span>
+        <span class="persona-tag">Серый рынок</span>
+      </div>
+    </div>
+    <div class="persona-metrics">
+      <div class="persona-metric"><div class="pm-val" style="color:var(--id)">10.3%</div><div class="pm-label">CR1</div></div>
+      <div class="persona-metric"><div class="pm-val" style="color:var(--id)">27.6%</div><div class="pm-label">CR2</div></div>
+      <div class="persona-metric"><div class="pm-val" style="color:var(--id)">$34</div><div class="pm-label">CAC</div></div>
+      <div class="persona-metric"><div class="pm-val" style="color:var(--id)">$14.44</div><div class="pm-label">FTD avg</div></div>
+    </div>
+  </div>
+  <div id="cjm-id"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAB: CJM ARJUN 🇮🇳
+══════════════════════════════════════ -->
+<div id="tab-cjm-in" class="tab-content">
+  <div class="persona-header" style="border-color:rgba(79,195,247,.3)">
+    <div class="persona-avatar" style="border-color:var(--in); background:rgba(79,195,247,.1)">👨</div>
+    <div>
+      <div class="persona-name" style="color:var(--in)">Arjun</div>
+      <div class="persona-geo">🇮🇳 Индия · Мужчина 25–34 · Дели/Мумбаи/Бангалор</div>
+      <div class="persona-tags">
+        <span class="persona-tag">Thrill/Social</span>
+        <span class="persona-tag">Dream11</span>
+        <span class="persona-tag">UPI</span>
+        <span class="persona-tag">CAC $4 🔥</span>
+        <span class="persona-tag">IT-сектор</span>
+      </div>
+    </div>
+    <div class="persona-metrics">
+      <div class="persona-metric"><div class="pm-val" style="color:var(--in)">12.6%</div><div class="pm-label">CR1</div></div>
+      <div class="persona-metric"><div class="pm-val" style="color:var(--in)">11.2%</div><div class="pm-label">CR2</div></div>
+      <div class="persona-metric"><div class="pm-val" style="color:var(--green)">$4</div><div class="pm-label">CAC</div></div>
+      <div class="persona-metric"><div class="pm-val" style="color:var(--in)">$18</div><div class="pm-label">FTD avg</div></div>
+    </div>
+  </div>
+  <div id="cjm-in"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAB: CJM LUCAS 🇧🇷
+══════════════════════════════════════ -->
+<div id="tab-cjm-br" class="tab-content">
+  <div class="persona-header" style="border-color:rgba(255,215,0,.3)">
+    <div class="persona-avatar" style="border-color:var(--br); background:rgba(255,215,0,.1)">👨</div>
+    <div>
+      <div class="persona-name" style="color:var(--br)">Lucas</div>
+      <div class="persona-geo">🇧🇷 Бразилия · Мужчина 25–34 · Сан-Паулу/Рио</div>
+      <div class="persona-tags">
+        <span class="persona-tag">Fun 72%</span>
+        <span class="persona-tag">Доп. доход 38%</span>
+        <span class="persona-tag">Pix</span>
+        <span class="persona-tag">ORM-культура</span>
+        <span class="persona-tag">Legalized 2025</span>
+      </div>
+    </div>
+    <div class="persona-metrics">
+      <div class="persona-metric"><div class="pm-val" style="color:var(--red)">4%</div><div class="pm-label">CR1</div></div>
+      <div class="persona-metric"><div class="pm-val" style="color:var(--br)">25.2%</div><div class="pm-label">CR2</div></div>
+      <div class="persona-metric"><div class="pm-val" style="color:var(--red)">$87</div><div class="pm-label">CAC</div></div>
+      <div class="persona-metric"><div class="pm-val" style="color:var(--br)">$25.20</div><div class="pm-label">FTD avg</div></div>
+    </div>
+  </div>
+  <div id="cjm-br"></div>
+</div>
+
+<script>
+// ── TAB SWITCHER ──
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active-info','active-cjm'); });
+  document.getElementById('tab-' + id).classList.add('active');
+  const isCjm = id.startsWith('cjm');
+  btn.classList.add(isCjm ? 'active-cjm' : 'active-info');
+  if (isCjm && !document.getElementById(id).innerHTML.trim()) renderCjm(id);
+}
+
+// ── EXPAND TOGGLE ──
+function toggleExp(el) {
+  const icon = el.querySelector('.exp-icon');
+  const body = el.querySelector('.exp-body');
+  body.classList.toggle('vis');
+  icon.classList.toggle('open');
+}
+
+// ── CJM DATA ──
+const cjmData = {
+  id: {
+    color: 'var(--id)',
+    emotionPoints: [50, 90, 70, 20, 20, 50, 50],
+    stages: [
+      { name:'Discovery', ru:'Осознание',
+        actions:['Видит пост в Instagram/TikTok о prediction markets','Читает статью, кликает по ссылке','Ищет отзывы и информацию'],
+        touchpoints:['Instagram 81.7%','YouTube 40.5%','TikTok 19.7%','Telegram'],
+        emotion:{cls:'em-neutral',icon:'🤔',text:'Любопытство +1'},
+        emDesc:'«Что это? Это законно?»',
+        metrics:[], pain:['Нет доверия — страх скама','Непонятно, законно ли в Индонезии','Нет контента на Bahasa Indonesia'],
+        opp:['Локализованный контент на Bahasa Indonesia','Influencer marketing через стримеров','Прозрачная страница «Как работает»']},
+      { name:'Registration', ru:'Регистрация',
+        actions:['Переходит на сайт','Подключает MetaMask/Phantom','Пополняет счёт'],
+        touchpoints:['Лендинг','MetaMask','Phantom','Email'],
+        emotion:{cls:'em-neg',icon:'😰',text:'Тревога −1'},
+        emDesc:'Страх взлома, непонимание gas fees',
+        metrics:[{l:'CR1',v:'10.3%'},{l:'CAC',v:'$34'}],
+        pain:['Web3-онбординг слишком сложен','Нет OVO/GoPay/Dana — только крипто','Страх потерять средства из кошелька'],
+        opp:['Custodial wallet опция','Интеграция OVO/GoPay/Dana','Social login (Google/Telegram)']},
+      { name:'Exploration', ru:'Изучение рынков',
+        actions:['Просматривает маркетплейс','Фильтрует по категориям','Читает условия резолюции'],
+        touchpoints:['Маркетплейс','Поиск','Категории'],
+        emotion:{cls:'em-neutral',icon:'🧐',text:'Интерес +1 / Растерянность −1'},
+        emDesc:'Много рынков, нет esports контента',
+        metrics:[],
+        pain:['Нет esports/Mobile Legends рынков','Нет контента на Bahasa Indonesia','Непонятные условия резолюции'],
+        opp:['Локальные рынки: Mobile Legends, badminton','Trending-секция по ID','Краткие пояснения условий']},
+      { name:'First Bet', ru:'Первая ставка',
+        actions:['Выбирает рынок и исход','Вводит сумму','Подтверждает транзакцию в кошельке'],
+        touchpoints:['Market page','Wallet popup','Email confirm'],
+        emotion:{cls:'em-peak',icon:'🔥',text:'Азарт +2'},
+        emDesc:'Пик вовлечённости — момент наибольшего риска оттока',
+        metrics:[{l:'CR2',v:'27.6%'},{l:'FTD',v:'$14.44'}],
+        pain:['Нет OVO/GoPay — только крипто (барьер)','Высокие gas fees','Нет paper trading для новичков'],
+        opp:['Локальные платёжные методы','Paper trading / демо-режим','Limit orders, нет undo']},
+      { name:'Active Usage', ru:'Активное использование',
+        actions:['Отслеживает позиции','Делится с друзьями в voice chat','Добавляет новые ставки'],
+        touchpoints:['Portfolio dashboard','Push-уведомления','Telegram','Leaderboard'],
+        emotion:{cls:'em-peak',icon:'💪',text:'Вовлечённость +2'},
+        emDesc:'Mabar-эффект: 2+ часа voice chat = prime time для ставок',
+        metrics:[],
+        pain:['Нет мобильного приложения','Плохие push-уведомления','Нет P&L-аналитики'],
+        opp:['Group betting «Mabar mode»','Mobile app (критично для ID)','Telegram-бот для быстрых ставок']},
+      { name:'Settlement', ru:'Расчёт & Вывод',
+        actions:['Рынок закрывается','Ждёт резолюцию оракула','Запрашивает вывод средств'],
+        touchpoints:['Email notification','Portfolio','Withdrawal UI'],
+        emotion:{cls:'em-pos',icon:'🎉',text:'Удовлетворение +2 или Разочарование −2'},
+        emDesc:'Бинарный исход: выиграл = лояльность, проиграл = риск оттока',
+        metrics:[],
+        pain:['Споры о резолюции — непрозрачный оракул','Долгий вывод через крипто','Высокие комиссии bridge'],
+        opp:['Прозрачный публичный оракул','Fast withdrawal','Чёткие правила на странице рынка']},
+      { name:'Retention', ru:'Удержание / Отток',
+        actions:['Возвращается за новыми рынками','Делится с друзьями (Mabar referral)','Или уходит к OlympTrade/1xBet'],
+        touchpoints:['Email re-engagement','Telegram','Referral'],
+        emotion:{cls:'em-pos',icon:'❤️',text:'Лояльность +1'},
+        emDesc:'Если Mabar-механика сработала — высокий retention',
+        metrics:[],
+        pain:['Нет esports рынков — уходит к 1xBet','OlympTrade 72.9K визитов из ID','Нет referral программы'],
+        opp:['Referral «Mabar» — приводи друзей','Gamification: стрики, leaderboard','Еженедельные локальные рынки']}
+    ]
+  },
+  in: {
+    color: 'var(--in)',
+    emotionPoints: [50, 90, 70, 20, 20, 90, 120],
+    stages: [
+      { name:'Discovery', ru:'Осознание',
+        actions:['Видит пост в Twitter/YouTube о prediction markets','Читает статью, интересуется как альтернативой Dream11','Ищет отзывы на Reddit'],
+        touchpoints:['Twitter/X','YouTube','Dream11-контекст','Reddit'],
+        emotion:{cls:'em-neutral',icon:'🤔',text:'Любопытство +1'},
+        emDesc:'«Чем это отличается от Dream11?»',
+        metrics:[],
+        pain:['Нет доверия — незнакомый продукт','Неясно — законно ли в Индии','Нет крикет/IPL контекста'],
+        opp:['SEO под «prediction market India»','Контент «vs Dream11»','Прозрачность и легальность']},
+      { name:'Registration', ru:'Регистрация',
+        actions:['Переходит на сайт','Подключает MetaMask','Сталкивается с проблемами верификации'],
+        touchpoints:['Лендинг','MetaMask','Email'],
+        emotion:{cls:'em-neg',icon:'😰',text:'Тревога −1'},
+        emDesc:'Страх взлома, непонимание DeFi',
+        metrics:[{l:'CR1',v:'12.6%'},{l:'CAC',v:'$4 🔥'}],
+        pain:['Нет UPI — только крипто','Финансовый мониторинг блокирует','Много фродеров на рынке'],
+        opp:['UPI-интеграция — главный приоритет','Custodial wallet','Верификация через Aadhaar']},
+      { name:'Exploration', ru:'Изучение рынков',
+        actions:['Просматривает рынки','Ищет крикет/IPL','Читает условия'],
+        touchpoints:['Маркетплейс','Поиск','Категории'],
+        emotion:{cls:'em-neutral',icon:'🧐',text:'Интерес +1 / Растерянность −1'},
+        emDesc:'Нет знакомого контента — только глобальные события',
+        metrics:[],
+        pain:['Нет крикет/IPL рынков','Нет локального контента','Конкурент Dream11 имеет 370M пользователей'],
+        opp:['IPL / крикет рынки','Hindi локализация','Персонализация по интересам']},
+      { name:'First Bet', ru:'Первая ставка',
+        actions:['Выбирает доступный рынок','Вводит сумму','Подтверждает транзакцию'],
+        touchpoints:['Market page','Wallet popup','Email confirm'],
+        emotion:{cls:'em-peak',icon:'🔥',text:'Азарт +2'},
+        emDesc:'IPL-пик: эмоции на максимуме',
+        metrics:[{l:'CR2',v:'11.2%'},{l:'FTD',v:'$18'}],
+        pain:['Нет UPI — биллинг блокируется','Высокие gas fees','CR2 11.2% — низкий, нужна оптимизация'],
+        opp:['UPI интеграция → рост CR2','Micro-betting (от $1)','Снижение gas fees']},
+      { name:'Active Usage', ru:'Активное использование',
+        actions:['Следит за IPL/крикет событиями','Делится в группах WhatsApp','Добавляет ставки во время матчей'],
+        touchpoints:['Portfolio dashboard','Push-уведомления','WhatsApp','Leaderboard'],
+        emotion:{cls:'em-peak',icon:'💪',text:'Вовлечённость +2'},
+        emDesc:'IPL-пик: 370M fantasy users — огромная аудитория рядом',
+        metrics:[],
+        pain:['Нет IPL-рынков — уходит в Dream11','Нет мобильного приложения','Плохие уведомления о событиях'],
+        opp:['Live-рынки по матчам','Mobile app','WhatsApp-бот']},
+      { name:'Settlement', ru:'Расчёт & Вывод',
+        actions:['Рынок закрывается','Ждёт резолюцию','Пытается вывести средства'],
+        touchpoints:['Email notification','Portfolio','Withdrawal UI'],
+        emotion:{cls:'em-neg',icon:'😤',text:'Разочарование −1'},
+        emDesc:'Долгий вывод через крипто vs мгновенный UPI',
+        metrics:[],
+        pain:['Долгий вывод — нет UPI','Финмониторинг блокирует выплаты','Споры о резолюции'],
+        opp:['UPI withdrawal — главный приоритет','Прозрачный оракул','Fast withdrawal']},
+      { name:'Retention', ru:'Удержание / Отток',
+        actions:['Сравнивает с Dream11','Уходит к OlympTrade (если проблемы с выводом)','Или возвращается за IPL-рынками'],
+        touchpoints:['Email re-engagement','WhatsApp','Referral'],
+        emotion:{cls:'em-crisis',icon:'😞',text:'Разочарование −2'},
+        emDesc:'OlympTrade забирает 40% индийского рынка — критическая угроза',
+        metrics:[],
+        pain:['OlympTrade 716K визитов из IN (40%!)','Dream11 370M пользователей','Нет IPL-рынков = нет retention'],
+        opp:['IPL / крикет рынки — ключевой фактор retention','Fantasy-механика совместных прогнозов','Referral через WhatsApp-группы']}
+    ]
+  },
+  br: {
+    color: 'var(--br)',
+    emotionPoints: [50, 90, 90, 20, 20, 20, 70],
+    stages: [
+      { name:'Discovery', ru:'Осознание',
+        actions:['Ищет в Google отзывы о платформах','Читает статьи на отзовиках','Видит рекламу через Google Ads'],
+        touchpoints:['Google Search','Отзовики (ORM)','Bet365-среда','YouTube'],
+        emotion:{cls:'em-neutral',icon:'🤔',text:'Любопытство +1'},
+        emDesc:'ORM-культура: сначала читает отзывы, потом решает',
+        metrics:[],
+        pain:['Нет Portuguese UI','Нет отзывов на бразильских платформах','Неизвестный бренд'],
+        opp:['ORM-стратегия — критически важна','Google Ads (разрешено с 2025)','Portuguese локализация']},
+      { name:'Registration', ru:'Регистрация',
+        actions:['Переходит на сайт после изучения отзывов','Подключает MetaMask','Пополняет счёт'],
+        touchpoints:['Лендинг','MetaMask','Email'],
+        emotion:{cls:'em-neg',icon:'😰',text:'Тревога −1'},
+        emDesc:'Культура отзывов: если нет доверия — не регистрируется',
+        metrics:[{l:'CR1',v:'4%'},{l:'CAC',v:'$87'}],
+        pain:['CR1 4% — самый низкий','CAC $87 — самый высокий','Нет Pix для пополнения'],
+        opp:['Pix-интеграция для депозита','ORM: позитивные отзывы на местных платформах','Custodial wallet']},
+      { name:'Exploration', ru:'Изучение рынков',
+        actions:['Просматривает рынки','Ищет Flamengo/Brasileirão','Читает условия на Portuguese'],
+        touchpoints:['Маркетплейс','Поиск','Категории'],
+        emotion:{cls:'em-neg',icon:'😵',text:'Растерянность −1'},
+        emDesc:'Нет Brazilian football рынков — главная боль',
+        metrics:[],
+        pain:['Нет Flamengo/Brasileirão рынков','Нет Portuguese UI','Слишком много непонятных глобальных рынков'],
+        opp:['Flamengo / Brasileirão рынки','Portuguese UI','Trending по BR']},
+      { name:'First Bet', ru:'Первая ставка',
+        actions:['Выбирает знакомый рынок','Вводит сумму','Подтверждает транзакцию'],
+        touchpoints:['Market page','Wallet popup','Email confirm'],
+        emotion:{cls:'em-peak',icon:'🔥',text:'Азарт +2'},
+        emDesc:'72% ставят «for fun» — низкий порог, но высокий CAC',
+        metrics:[{l:'CR2',v:'25.2%'},{l:'FTD',v:'$25.20'}],
+        pain:['Нет Pix — только крипто','$87 CAC — нужен качественный контент','Культура изучения отзывов тормозит'],
+        opp:['Pix интеграция — снижает CAC','Социальные доказательства','Paper trading для новичков']},
+      { name:'Active Usage', ru:'Активное использование',
+        actions:['Следит за Flamengo матчами','Делится в WhatsApp','Ставит на live-события'],
+        touchpoints:['Portfolio dashboard','Push-уведомления','WhatsApp','Leaderboard'],
+        emotion:{cls:'em-peak',icon:'💪',text:'Вовлечённость +2'},
+        emDesc:'Спорт = культура: 18% ставят «за любимую команду»',
+        metrics:[],
+        pain:['Нет Flamengo live-рынков','Нет мобильного приложения','Плохие уведомления'],
+        opp:['Live-рынки Brasileirão','Mobile app','Social betting с друзьями']},
+      { name:'Settlement', ru:'Расчёт & Вывод',
+        actions:['Рынок закрывается','Ждёт резолюцию','Выводит средства'],
+        touchpoints:['Email notification','Portfolio','Withdrawal UI'],
+        emotion:{cls:'em-peak',icon:'🎉',text:'Удовлетворение +2'},
+        emDesc:'Легальный рынок с 2025 — меньше рисков при выводе',
+        metrics:[],
+        pain:['Долгий вывод — нет Pix','Споры о резолюции','Дорогой bridge'],
+        opp:['Pix withdrawal — мгновенно','Прозрачный оракул','Простая процедура вывода']},
+      { name:'Retention', ru:'Удержание / Отток',
+        actions:['Пишет отзыв (ORM-культура)','Возвращается за Brasileirão рынками','Или уходит к Bet365'],
+        touchpoints:['Email re-engagement','WhatsApp','Referral'],
+        emotion:{cls:'em-neu',icon:'🤷',text:'Нейтрально 0'},
+        emDesc:'ORM: один плохой отзыв = потеря новых пользователей',
+        metrics:[],
+        pain:['Bet365 доминирует в футбольной аудитории','Нет Brasileirão рынков = нет retention','ORM: негативные отзывы гасят CR1'],
+        opp:['Brasileirão / Copa рынки — ключ к retention','Программа управления отзывами','Gamification: бразильский leaderboard']}
+    ]
+  }
+};
+
+function renderCjm(id) {
+  const persona = id.replace('cjm-','');
+  const d = cjmData[persona];
+  const container = document.getElementById(id);
+
+  // Build table
+  const rows = ['actions','touchpoints','emotion','metrics','pain','opp'];
+  const rowLabels = {actions:'Действия',touchpoints:'Touchpoints',emotion:'Эмоции',metrics:'Метрики',pain:'Pain Points',opp:'Opportunities'};
+
+  let html = `<div class="cjm-wrapper"><div class="cjm-table">`;
+
+  // Stage headers row
+  html += `<div class="row-label">Этап</div>`;
+  d.stages.forEach((s,i) => {
+    html += `<div class="stage-head"><div class="stage-num">Stage 0${i+1}</div><div class="stage-name">${s.name}</div><div class="stage-name-ru">${s.ru}</div></div>`;
+  });
+
+  // Actions
+  html += `<div class="row-label">Действия</div>`;
+  d.stages.forEach(s => {
+    html += `<div class="cell"><ul class="action-list">${s.actions.map(a=>`<li>${a}</li>`).join('')}</ul></div>`;
+  });
+
+  // Touchpoints
+  html += `<div class="row-label">Touchpoints</div>`;
+  d.stages.forEach(s => {
+    html += `<div class="cell"><div class="tp-wrap">${s.touchpoints.map(t=>`<span class="tp">${t}</span>`).join('')}</div></div>`;
+  });
+
+  // Emotions
+  html += `<div class="row-label">Эмоции</div>`;
+  d.stages.forEach(s => {
+    html += `<div class="cell"><div class="em-badge ${s.emotion.cls}">${s.emotion.icon} ${s.emotion.text}</div><div class="em-desc">${s.emDesc}</div></div>`;
+  });
+
+  // Metrics
+  html += `<div class="row-label">Метрики</div>`;
+  d.stages.forEach(s => {
+    const pills = s.metrics.map(m=>`<span class="mpill"><strong>${m.l}</strong> ${m.v}</span>`).join('');
+    html += `<div class="cell">${pills || '<span style="color:var(--muted);font-size:11px">—</span>'}</div>`;
+  });
+
+  // Pain
+  html += `<div class="row-label">Pain Points</div>`;
+  d.stages.forEach(s => {
+    html += `<div class="cell"><div class="expandable" onclick="toggleExp(this)">
+      <div class="exp-hd pain"><span class="exp-icon open">▶</span> Боли (${s.pain.length})</div>
+      <div class="exp-body vis">${s.pain.map(p=>`<div class="pain-item">${p}</div>`).join('')}</div>
+    </div></div>`;
+  });
+
+  // Opportunities
+  html += `<div class="row-label">Opportunities</div>`;
+  d.stages.forEach(s => {
+    html += `<div class="cell"><div class="expandable" onclick="toggleExp(this)">
+      <div class="exp-hd opp"><span class="exp-icon open">▶</span> Идеи (${s.opp.length})</div>
+      <div class="exp-body vis">${s.opp.map(o=>`<div class="opp-item">${o}</div>`).join('')}</div>
+    </div></div>`;
+  });
+
+  html += `</div></div>`;
+
+  // Emotion curve
+  const pts = d.emotionPoints;
+  const xs = [110,200,290,380,470,560,650];
+  const svgPts = xs.map((x,i)=>`${x},${pts[i]}`).join(' ');
+  // Smooth curve
+  let path = `M${xs[0]},${pts[0]}`;
+  for (let i=1;i<xs.length;i++) {
+    const cpx = (xs[i-1]+xs[i])/2;
+    path += ` C${cpx},${pts[i-1]} ${cpx},${pts[i]} ${xs[i]},${pts[i]}`;
+  }
+
+  html += `<div class="section"><div class="section-title">Эмоциональная кривая</div>
+  <div class="curve-wrap">
+    <svg id="emotion-svg" viewBox="0 50 760 110" preserveAspectRatio="xMidYMid meet">
+      <line x1="50" y1="70" x2="700" y2="70" stroke="var(--border)" stroke-width="1"/>
+      <text x="44" y="73" fill="var(--muted)" font-size="8" text-anchor="end">0</text>
+      <line x1="50" y1="20" x2="700" y2="20" stroke="var(--border)" stroke-width=".5" stroke-dasharray="3,3"/>
+      <text x="44" y="23" fill="var(--muted)" font-size="8" text-anchor="end">+2</text>
+      <line x1="50" y1="120" x2="700" y2="120" stroke="var(--border)" stroke-width=".5" stroke-dasharray="3,3"/>
+      <text x="44" y="123" fill="var(--muted)" font-size="8" text-anchor="end">−2</text>
+      ${xs.slice(1).map(x=>`<line x1="${x}" y1="15" x2="${x}" y2="135" stroke="var(--border)" stroke-width=".5"/>`).join('')}
+      <path d="${path}" stroke="${d.color}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      ${xs.map((x,i)=>`<circle cx="${x}" cy="${pts[i]}" r="4" fill="${d.color}" stroke="var(--bg)" stroke-width="2"/>`).join('')}
+    </svg>
+    <div class="curve-labels">
+      ${d.stages.map((s,i)=>`<div class="curve-lbl"><strong>${i+1}</strong>${s.ru}</div>`).join('')}
+    </div>
+  </div></div>`;
+
+  container.innerHTML = html;
+}
+
+// Init first tab active
+document.querySelector('.tab').classList.add('active-info');
+</script>
+</body>
+</html>
