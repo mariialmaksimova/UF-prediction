@@ -392,22 +392,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="variant-header">
       <div>
         <div class="variant-name" style="color:var(--purple)">Вариант C — Appropriateness Test</div>
-        <div class="variant-desc">После FTD пользователь проходит тест знаний (5-7 вопросов). По результатам получает уровень доступа. Используется eToro, Interactive Brokers. Юридически: пользователь сам декларирует уровень риска и опыт — это снимает ответственность с платформы.</div>
+        <div class="variant-desc">Зона 0 — те же рынки что в A, плюс блок обучения. После регистрации пользователь играет на демо и проходит тест. Зона 2 открывается при прохождении теста ИЛИ KYC — два равнозначных пути.</div>
       </div>
       <div class="variant-meta">
         <span class="meta-pill pill-green">★★★★★ Юридическая защита</span>
         <span class="meta-pill pill-purple" style="color:var(--purple); border-color:rgba(188,140,255,.3); background:var(--purple-dim)">eToro-стандарт</span>
+        <span class="meta-pill pill-blue">2 пути разблокировки</span>
       </div>
     </div>
     <div class="variant-body">
       <div class="flow-wrap">
         <div class="flow">
 
-          <div class="zone zone-grey">
+          <div class="zone zone-grey" style="width:220px">
             <div class="zone-head">
               <div class="zone-label">Зона 0</div>
               <div class="zone-title">Unauth</div>
-              <div class="zone-trigger">Без аккаунта</div>
+              <div class="zone-trigger">Что видят модераторы рекламы</div>
             </div>
             <div class="zone-body">
               <div class="zone-item available"><span class="dot"></span>Prediction markets график</div>
@@ -421,63 +422,64 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
               <div class="zone-item blocked"><span class="dot"></span>Другие графики</div>
               <div class="zone-item blocked"><span class="dot"></span>Инструменты трейдера</div>
               <div class="zone-item blocked"><span class="dot"></span>Криптовалюты</div>
+              <div style="height:6px"></div>
+              <div class="zone-item highlight"><span class="dot"></span>📚 Блок обучения (preview)</div>
             </div>
             <div class="zone-footer cta">Sign up to predict →</div>
           </div>
 
           <div class="flow-arrow">→</div>
 
-          <div class="zone zone-blue">
+          <div class="zone zone-blue" style="width:240px">
             <div class="zone-head">
               <div class="zone-label">Зона 1</div>
-              <div class="zone-title">Registered + FTD</div>
-              <div class="zone-trigger">После первого депозита</div>
+              <div class="zone-title">Registered</div>
+              <div class="zone-trigger">После регистрации (Email/Phone)</div>
             </div>
             <div class="zone-body">
-              <div class="zone-item available"><span class="dot"></span>Реальные prediction markets</div>
-              <div style="height:8px"></div>
-              <div class="zone-item highlight"><span class="dot"></span>↓ Тест знаний (5-7 вопросов)</div>
-              <div class="zone-item available" style="font-size:10px; color:var(--muted)"><span class="dot" style="background:transparent"></span>"Что такое бинарный опцион?"</div>
-              <div class="zone-item available" style="font-size:10px; color:var(--muted)"><span class="dot" style="background:transparent"></span>"Ваш опыт торговли?"</div>
-              <div class="zone-item available" style="font-size:10px; color:var(--muted)"><span class="dot" style="background:transparent"></span>"Готовы к потере 100%?"</div>
+              <div class="zone-item available"><span class="dot"></span>Prediction markets график</div>
+              <div class="zone-item available"><span class="dot"></span>⚽ Спорт и Киберспорт</div>
+              <div class="zone-item available"><span class="dot"></span>💻 Технологии</div>
+              <div class="zone-item available"><span class="dot"></span>🌤️ Погода</div>
+              <div class="zone-item available"><span class="dot"></span>Политика</div>
+              <div class="zone-item available"><span class="dot"></span>Экономика</div>
+              <div class="zone-item available"><span class="dot"></span>Финансы (акции, сырьевые, валютные пары)</div>
+              <div class="zone-item highlight"><span class="dot"></span>✅ Ставки на демо-деньги</div>
+              <div style="height:6px"></div>
+              <div class="zone-item available" style="color:var(--purple); font-weight:600"><span class="dot" style="background:var(--purple)"></span>📚 Обучение + тест</div>
+              <div class="zone-item available" style="font-size:10px; color:var(--muted)"><span class="dot" style="background:transparent"></span>Видеоуроки и статьи</div>
+              <div class="zone-item available" style="font-size:10px; color:var(--muted)"><span class="dot" style="background:transparent"></span>Тест: 5-7 вопросов о рисках</div>
+              <div class="zone-item available" style="font-size:10px; color:var(--muted)"><span class="dot" style="background:transparent"></span>Декларация принятия рисков</div>
             </div>
-            <div class="zone-footer">Sumsub KYC параллельно</div>
-          </div>
-
-          <div class="flow-arrow">→</div>
-
-          <div class="zone zone-yellow">
-            <div class="zone-head">
-              <div class="zone-label">Результат А</div>
-              <div class="zone-title">Новичок</div>
-              <div class="zone-trigger">Недостаточно опыта</div>
-            </div>
-            <div class="zone-body">
-              <div class="zone-item available"><span class="dot"></span>Prediction markets</div>
-              <div class="zone-item available"><span class="dot"></span>Образовательный контент</div>
-              <div class="zone-item available"><span class="dot"></span>Demo для Pro-инструментов</div>
-              <div style="height:8px"></div>
-              <div class="zone-item locked"><span class="dot"></span>🔒 Pro — демо-доступ</div>
-              <div class="zone-item blocked"><span class="dot"></span>Binary / FX реальные $</div>
-            </div>
-            <div class="zone-footer cta">Пройди обучение → пересдай</div>
+            <div class="zone-footer cta">Пройди тест или верифицируй ID →</div>
           </div>
 
           <div class="flow-arrow">→</div>
 
           <div class="zone zone-green">
             <div class="zone-head">
-              <div class="zone-label">Результат Б</div>
-              <div class="zone-title">Опытный</div>
-              <div class="zone-trigger">Декларирует риски → KYC</div>
+              <div class="zone-label">Зона 2</div>
+              <div class="zone-title">Полный доступ</div>
+              <div class="zone-trigger">Тест ✅ ИЛИ KYC ✅</div>
             </div>
             <div class="zone-body">
-              <div class="zone-item available"><span class="dot"></span>Всё из Зоны 1</div>
-              <div class="zone-item highlight"><span class="dot"></span>Fixed-Time Predictions ✨</div>
-              <div class="zone-item highlight"><span class="dot"></span>Currency / Digital Assets</div>
-              <div class="zone-item available"><span class="dot"></span>Полные инструменты</div>
+              <div class="zone-item available"><span class="dot"></span>Prediction markets график</div>
+              <div class="zone-item available"><span class="dot"></span>⚽ Спорт и Киберспорт</div>
+              <div class="zone-item available"><span class="dot"></span>💻 Технологии</div>
+              <div class="zone-item available"><span class="dot"></span>🌤️ Погода</div>
+              <div class="zone-item available"><span class="dot"></span>Политика</div>
+              <div class="zone-item available"><span class="dot"></span>Экономика</div>
+              <div class="zone-item available"><span class="dot"></span>Финансы (акции, сырьевые, валютные пары)</div>
+              <div class="zone-item highlight"><span class="dot"></span>🆕 Крипторынки</div>
+              <div style="height:6px"></div>
+              <div class="zone-item highlight"><span class="dot"></span>✅ Реальные ставки — все рынки</div>
+              <div class="zone-item highlight"><span class="dot"></span>✅ Инструменты трейдера</div>
+              <div class="zone-item highlight"><span class="dot"></span>✅ Все типы графиков</div>
             </div>
-            <div class="zone-footer">Подписывает декларацию рисков</div>
+            <div class="zone-footer" style="font-size:10px; color:var(--muted); line-height:1.5">
+              <span style="color:var(--purple); font-weight:600">Путь 1:</span> прошёл тест → доступ сразу<br>
+              <span style="color:var(--green); font-weight:600">Путь 2:</span> прошёл KYC (Sumsub) → доступ сразу
+            </div>
           </div>
 
         </div>
