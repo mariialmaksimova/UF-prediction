@@ -296,13 +296,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="variant-card" style="border-color: rgba(0,200,83,.3)">
     <div class="variant-header">
       <div>
-        <div class="variant-name" style="color:var(--green)">Вариант B — KYC Tier Gates</div>
-        <div class="variant-desc">Sumsub тиры как единственный механизм разблокировки. Tier 1 (имя+дата, &lt;1 мин) перед FTD снижает friction. Tier 2 (документ+selfie) открывает Pro-инструменты. Максимальная защита перед рекламными сетями и регуляторами.</div>
+        <div class="variant-name" style="color:var(--green)">Вариант B — KYC Gate</div>
+        <div class="variant-desc">Та же структура что в варианте A, но полный доступ открывается через верификацию личности (KYC), а не через депозит. После KYC пользователь может пополнить счёт любым способом.</div>
       </div>
       <div class="variant-meta">
-        <span class="meta-pill pill-green">★★★★★ Защита рекламы</span>
         <span class="meta-pill pill-green">Sumsub уже есть</span>
         <span class="meta-pill pill-blue">Регуляторно совместим</span>
+        <span class="meta-pill pill-green">Без крипто-барьера</span>
       </div>
     </div>
     <div class="variant-body">
@@ -311,17 +311,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
           <div class="zone zone-grey">
             <div class="zone-head">
-              <div class="zone-label">Tier 0</div>
-              <div class="zone-title">Анонимно</div>
-              <div class="zone-trigger">Без аккаунта</div>
+              <div class="zone-label">Зона 0</div>
+              <div class="zone-title">Unauth</div>
+              <div class="zone-trigger">Что видят модераторы рекламы</div>
             </div>
             <div class="zone-body">
-              <div class="zone-item available"><span class="dot"></span>Browse рынков</div>
-              <div class="zone-item available"><span class="dot"></span>Вероятности и статистика</div>
-              <div class="zone-item available"><span class="dot"></span>Категории событий</div>
-              <div style="height:8px"></div>
-              <div class="zone-item blocked"><span class="dot"></span>Ставки / торговля</div>
-              <div class="zone-item blocked"><span class="dot"></span>Binary / FX / крипто</div>
+              <div class="zone-item available"><span class="dot"></span>Prediction markets график</div>
+              <div class="zone-item available"><span class="dot"></span>⚽ Спорт и Киберспорт</div>
+              <div class="zone-item available"><span class="dot"></span>💻 Технологии</div>
+              <div class="zone-item available"><span class="dot"></span>🌤️ Погода</div>
+              <div class="zone-item available"><span class="dot"></span>Политика</div>
+              <div class="zone-item available"><span class="dot"></span>Экономика</div>
+              <div class="zone-item available"><span class="dot"></span>Финансы (акции, сырьевые, валютные пары)</div>
             </div>
             <div class="zone-footer cta">Sign up to predict →</div>
           </div>
@@ -330,59 +331,45 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
           <div class="zone zone-blue">
             <div class="zone-head">
-              <div class="zone-label">Tier 1</div>
-              <div class="zone-title">Email + Phone</div>
-              <div class="zone-trigger">Sumsub Basic &lt;1 мин (имя+дата)</div>
+              <div class="zone-label">Зона 1</div>
+              <div class="zone-title">Registered</div>
+              <div class="zone-trigger">После регистрации (Email/Phone)</div>
             </div>
             <div class="zone-body">
-              <div class="zone-item available"><span class="dot"></span>Demo prediction markets</div>
-              <div class="zone-item available"><span class="dot"></span>Лидерборд</div>
-              <div class="zone-item available"><span class="dot"></span>Ранги Forecaster</div>
-              <div style="height:8px"></div>
-              <div class="zone-item blocked"><span class="dot"></span>Реальные деньги</div>
-              <div class="zone-item blocked"><span class="dot"></span>Финансовые рынки</div>
-              <div class="zone-item blocked"><span class="dot"></span>Binary / FX / крипто</div>
+              <div class="zone-item available"><span class="dot"></span>Prediction markets график</div>
+              <div class="zone-item available"><span class="dot"></span>⚽ Спорт и Киберспорт</div>
+              <div class="zone-item available"><span class="dot"></span>💻 Технологии</div>
+              <div class="zone-item available"><span class="dot"></span>🌤️ Погода</div>
+              <div class="zone-item available"><span class="dot"></span>Политика</div>
+              <div class="zone-item available"><span class="dot"></span>Экономика</div>
+              <div class="zone-item available"><span class="dot"></span>Финансы (акции, сырьевые, валютные пары)</div>
+              <div style="height:6px"></div>
+              <div class="zone-item highlight"><span class="dot"></span>✅ Ставки на демо-деньги</div>
             </div>
-            <div class="zone-footer">Sumsub Tier 1: имя, дата, страна</div>
-          </div>
-
-          <div class="flow-arrow">→</div>
-
-          <div class="zone zone-orange">
-            <div class="zone-head">
-              <div class="zone-label">Tier 2</div>
-              <div class="zone-title">FTD</div>
-              <div class="zone-trigger">После первого депозита</div>
-            </div>
-            <div class="zone-body">
-              <div class="zone-item available"><span class="dot"></span>Реальные prediction markets</div>
-              <div class="zone-item available"><span class="dot"></span>Финансовые рынки (акции)</div>
-              <div class="zone-item available"><span class="dot"></span>🇮🇩 OVO / GoPay / Dana</div>
-              <div class="zone-item available"><span class="dot"></span>🇳🇬 Paystack / Flutterwave</div>
-              <div style="height:8px"></div>
-              <div class="zone-item locked"><span class="dot"></span>🔒 Pro раздел</div>
-              <div class="zone-item blocked"><span class="dot"></span>Binary / FX / крипто</div>
-            </div>
-            <div class="zone-footer cta">Verify ID → unlock Pro</div>
+            <div class="zone-footer cta">Verify identity → play for real →</div>
           </div>
 
           <div class="flow-arrow">→</div>
 
           <div class="zone zone-green">
             <div class="zone-head">
-              <div class="zone-label">Tier 3</div>
-              <div class="zone-title">Full KYC</div>
+              <div class="zone-label">Зона 2</div>
+              <div class="zone-title">KYC Verified</div>
               <div class="zone-trigger">Sumsub doc + selfie (2-4 мин)</div>
             </div>
             <div class="zone-body">
-              <div class="zone-item available"><span class="dot"></span>Всё из Tier 2</div>
-              <div class="zone-item highlight"><span class="dot"></span>Fixed-Time Predictions ✨</div>
-              <div class="zone-item highlight"><span class="dot"></span>Currency Market Predictions</div>
-              <div class="zone-item highlight"><span class="dot"></span>Digital Asset Predictions</div>
-              <div class="zone-item available"><span class="dot"></span>🇮🇩 KTP автопроверка</div>
-              <div class="zone-item available"><span class="dot"></span>🇳🇬 NIN автопроверка</div>
+              <div class="zone-item available"><span class="dot"></span>Prediction markets график</div>
+              <div class="zone-item available"><span class="dot"></span>⚽ Спорт и Киберспорт</div>
+              <div class="zone-item available"><span class="dot"></span>💻 Технологии</div>
+              <div class="zone-item available"><span class="dot"></span>🌤️ Погода</div>
+              <div class="zone-item available"><span class="dot"></span>Политика</div>
+              <div class="zone-item available"><span class="dot"></span>Экономика</div>
+              <div class="zone-item available"><span class="dot"></span>Финансы (акции, сырьевые, валютные пары)</div>
+              <div class="zone-item highlight"><span class="dot"></span>🆕 Крипторынки</div>
+              <div style="height:6px"></div>
+              <div class="zone-item highlight"><span class="dot"></span>✅ Реальные ставки — все рынки</div>
             </div>
-            <div class="zone-footer">Sumsub: KTP/Passport + selfie</div>
+            <div class="zone-footer cta">Пополни любым способом →</div>
           </div>
 
         </div>
