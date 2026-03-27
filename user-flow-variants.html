@@ -142,6 +142,37 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .divider { height: 1px; background: var(--border); margin: 24px 0; }
 
 .note-box { background: rgba(88,166,255,.07); border: 1px solid rgba(88,166,255,.2); border-radius: 8px; padding: 12px 16px; font-size: 11px; color: var(--blue); line-height: 1.6; margin-bottom: 20px; }
+
+/* AD FLOW PAGE */
+.ad-steps { display: flex; align-items: flex-start; gap: 0; overflow-x: auto; padding-bottom: 8px; margin-bottom: 28px; }
+.ad-step { width: 180px; flex-shrink: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+.ad-step-highlight { border-color: rgba(0,200,83,.4); background: rgba(0,200,83,.04); }
+.step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--muted); flex-shrink: 0; }
+.step-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+.step-desc { font-size: 10px; color: var(--muted); line-height: 1.5; }
+.step-arrow { display: flex; align-items: center; padding: 0 4px; color: var(--muted); font-size: 18px; flex-shrink: 0; align-self: center; margin-top: -20px; }
+
+.option-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.option-badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; align-self: flex-start; }
+.option-title { font-size: 14px; font-weight: 700; }
+.option-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.option-items { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+.option-item { font-size: 11px; line-height: 1.4; }
+.option-item.ok { color: var(--text); }
+.option-item.warn { color: var(--muted); }
+.option-footer { font-size: 10px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; font-family: monospace; }
+
+.status-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.status-live { border-color: rgba(0,200,83,.3); }
+.status-soon { border-color: rgba(255,140,0,.3); }
+.status-badge { font-size: 11px; font-weight: 700; margin-bottom: 12px; }
+.status-items { display: flex; flex-direction: column; gap: 8px; font-size: 12px; }
+.status-items > div { display: flex; align-items: center; gap: 8px; }
+
+.antichurn-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.antichurn-icon { font-size: 22px; }
+.antichurn-title { font-size: 12px; font-weight: 700; }
+.antichurn-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -155,6 +186,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 <div class="tab-bar">
   <button class="tab active" onclick="showPage('va',this)">A — Progressive</button>
+  <button class="tab" onclick="showPage('adflow',this)">A — Рекламный флоу</button>
   <button class="tab" onclick="showPage('alt',this)">Альтернативные варианты</button>
 </div>
 
@@ -299,6 +331,219 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
     </div>
   </div>
+</div>
+
+<!-- ══════════════════════════════════════ AD FLOW ══════════════════════════════════════ -->
+<div id="page-adflow" class="page">
+
+  <!-- Зоны доступа (копия Варианта A) -->
+  <div class="variant-card" style="border-color: rgba(88,166,255,.3)">
+    <div class="variant-header">
+      <div>
+        <div class="variant-name" style="color:var(--blue)">Зоны доступа — Вариант A</div>
+        <div class="variant-desc">Прогрессивное раскрытие функционала: от рекламного просмотра до полного доступа после первого депозита.</div>
+      </div>
+      <div class="variant-meta">
+        <span class="meta-pill pill-green">⭐ Быстро запустить</span>
+        <span class="meta-pill pill-blue">Прост в реализации</span>
+        <span class="meta-pill pill-yellow">Средний CR2</span>
+      </div>
+    </div>
+    <div class="variant-body">
+      <div class="flow-wrap">
+        <div class="flow">
+          <div class="zone zone-grey">
+            <div class="zone-head">
+              <div class="zone-label">Зона 0</div>
+              <div class="zone-title">Unauth</div>
+              <div class="zone-trigger">Что видят модераторы рекламы</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>⚽ Спорт и Киберспорт</div>
+              <div class="zone-item available"><span class="dot"></span>💻 Технологии</div>
+              <div class="zone-item available"><span class="dot"></span>🌤️ Погода</div>
+              <div class="zone-item available"><span class="dot"></span>Политика</div>
+              <div class="zone-item available"><span class="dot"></span>Экономика</div>
+              <div class="zone-item available"><span class="dot"></span>Финансы (акции, сырьевые)</div>
+              <div class="zone-item available"><span class="dot"></span>Все виды графиков доступны</div>
+              <div style="height:6px"></div>
+              <div class="zone-item blocked"><span class="dot"></span>❌ Инструменты трейдера</div>
+              <div class="zone-item blocked"><span class="dot"></span>❌ Валютные пары</div>
+              <div class="zone-item blocked"><span class="dot"></span>❌ Криптовалюты</div>
+            </div>
+            <div class="zone-footer cta">Sign up to predict →</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="zone zone-blue">
+            <div class="zone-head">
+              <div class="zone-label">Зона 1</div>
+              <div class="zone-title">Registered</div>
+              <div class="zone-trigger">После регистрации (Email/Phone)</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>⚽ Спорт и Киберспорт</div>
+              <div class="zone-item available"><span class="dot"></span>💻 Технологии</div>
+              <div class="zone-item available"><span class="dot"></span>🌤️ Погода</div>
+              <div class="zone-item available"><span class="dot"></span>Политика</div>
+              <div class="zone-item available"><span class="dot"></span>Экономика</div>
+              <div class="zone-item available"><span class="dot"></span>Финансы (акции, сырьевые)</div>
+              <div class="zone-item available"><span class="dot"></span>Все виды графиков доступны</div>
+              <div style="height:6px"></div>
+              <div class="zone-item highlight"><span class="dot"></span>✅ Ставки на демо-деньги</div>
+              <div style="height:6px"></div>
+              <div class="zone-item blocked"><span class="dot"></span>❌ Инструменты трейдера</div>
+              <div class="zone-item blocked"><span class="dot"></span>❌ Валютные пары</div>
+              <div class="zone-item blocked"><span class="dot"></span>❌ Криптовалюты</div>
+            </div>
+            <div class="zone-footer cta">Deposit &amp; play for real →</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="zone zone-green">
+            <div class="zone-head">
+              <div class="zone-label">Зона 2</div>
+              <div class="zone-title">FTD Done</div>
+              <div class="zone-trigger">После первого депозита</div>
+            </div>
+            <div class="zone-body">
+              <div class="zone-item available"><span class="dot"></span>⚽ Спорт и Киберспорт</div>
+              <div class="zone-item available"><span class="dot"></span>💻 Технологии</div>
+              <div class="zone-item available"><span class="dot"></span>🌤️ Погода</div>
+              <div class="zone-item available"><span class="dot"></span>Политика</div>
+              <div class="zone-item available"><span class="dot"></span>Экономика</div>
+              <div class="zone-item available"><span class="dot"></span>Финансы (акции, сырьевые, валютные пары)</div>
+              <div class="zone-item highlight"><span class="dot"></span>🆕 Крипторынки</div>
+              <div style="height:6px"></div>
+              <div class="zone-item highlight"><span class="dot"></span>✅ Реальные ставки — все рынки</div>
+              <div class="zone-item highlight"><span class="dot"></span>🆕 Доступны дополнительные трейдерские инструменты</div>
+            </div>
+            <div class="zone-footer" style="color:var(--muted); font-size:10px; line-height:1.5">⚠️ KYC (паспорт + selfie) запрашивается только если пополнение <strong style="color:var(--text)">не криптой</strong> (банк, e-wallet)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Рекламный путь: шаги -->
+  <div class="section-title">Рекламный путь: от объявления до демо аккаунта</div>
+  <div class="ad-steps">
+    <div class="ad-step">
+      <div class="step-num">1</div>
+      <div class="step-title">📱 Реклама</div>
+      <div class="step-desc">TikTok / Google Ads<br>"Реал победит?"<br><br>UTM:<br>utm_content=sport<br>utm_match=real_vs_barca</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="ad-step">
+      <div class="step-num">2</div>
+      <div class="step-title">🌐 Лендинг</div>
+      <div class="step-desc">app.com/match?id=123<br><br>Динамически подгружает данные матча из Polymarket / Kalshi API<br><br><span style="color:var(--green);font-weight:600">Реклама ≡ Лендинг</span></div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="ad-step">
+      <div class="step-num">3</div>
+      <div class="step-title">⚽ Карточка матча</div>
+      <div class="step-desc">Реал Мадрид vs Барселона<br>Odds: 1.85 / 2.10<br><br>Кнопки<br>[UP] [DOWN]</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="ad-step">
+      <div class="step-num">4</div>
+      <div class="step-title">📋 Регистрация</div>
+      <div class="step-desc">Клик на [UP]/[DOWN]<br>→ всплывает модалка<br><br>Email / Phone<br>~30 секунд</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="ad-step ad-step-highlight">
+      <div class="step-num">5</div>
+      <div class="step-title" style="color:var(--green)">🎮 Демо аккаунт</div>
+      <div class="step-desc">Тот же матч<br>Виртуальные деньги<br>Реальные коэффициенты<br>Реальные исходы</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="ad-step">
+      <div class="step-num">6</div>
+      <div class="step-title">💰 FTD</div>
+      <div class="step-desc">После демо-опыта<br>→ предложение пополнить<br><br>🇮🇩 OVO / GoPay<br>🇳🇬 Paystack</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Демо: варианты интеграции -->
+  <div class="section-title">Демо аккаунт — варианты интеграции</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px">
+    <div class="option-card" style="border-color:rgba(88,166,255,.4)">
+      <div class="option-badge" style="background:rgba(88,166,255,.15);color:var(--blue)">Вариант A — MVP · Рекомендуем первым</div>
+      <div class="option-title">Polymarket API</div>
+      <div class="option-desc">Бесплатный публичный REST API, без регистрации и ключей. 1485+ спортивных рынков: футбол, киберспорт, NBA, NFL.</div>
+      <div class="option-items">
+        <div class="option-item ok">✅ Реальные коэффициенты и исходы матчей</div>
+        <div class="option-item ok">✅ Ставки на виртуальные деньги, исход = реальный</div>
+        <div class="option-item ok">✅ Быстрая интеграция (~1 день разработки)</div>
+        <div class="option-item ok">✅ Rate limit: 15 000 запросов / 10 сек</div>
+        <div class="option-item warn">⚠️ Данные помечены брендом Polymarket — нужна обёртка</div>
+      </div>
+      <div class="option-footer">docs.polymarket.com · GET /markets · GET /prices</div>
+    </div>
+    <div class="option-card" style="border-color:rgba(0,200,83,.4)">
+      <div class="option-badge" style="background:rgba(0,200,83,.15);color:var(--green)">Вариант B — Production</div>
+      <div class="option-title">Kalshi API</div>
+      <div class="option-desc">CFTC-регулируемая биржа США. 90%+ объёма торгов — спорт. Выглядит как профессиональная интеграция без привязки к стороннему бренду.</div>
+      <div class="option-items">
+        <div class="option-item ok">✅ CFTC-регулируемый (compliance без вопросов)</div>
+        <div class="option-item ok">✅ Данные можно брендировать под своё приложение</div>
+        <div class="option-item ok">✅ Реальная ликвидность и глубина рынка</div>
+        <div class="option-item ok">✅ Бесплатный Advanced-тир по запросу</div>
+        <div class="option-item warn">⚠️ Интеграция сложнее (~2-3 дня)</div>
+      </div>
+      <div class="option-footer">docs.kalshi.com · GET /series · GET /markets · GET /orderbook</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Реальный аккаунт: статус -->
+  <div class="section-title">Реальный аккаунт — статус разработки</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px">
+    <div class="status-card status-live">
+      <div class="status-badge" style="color:var(--green)">✅ Работает сейчас — реальные деньги</div>
+      <div class="status-items">
+        <div>💹 Крипторынки</div>
+        <div>📈 Акции и индексы</div>
+        <div>💱 Валютные пары</div>
+      </div>
+    </div>
+    <div class="status-card status-soon">
+      <div class="status-badge" style="color:var(--orange)">🔒 В разработке — нужен микросервис</div>
+      <div class="status-items">
+        <div>⚽ Спорт и Киберспорт</div>
+        <div>🌤️ Погода</div>
+        <div>💻 Технологии</div>
+        <div>🏛️ Политика / Экономика</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Anti-churn механика -->
+  <div class="section-title">Anti-churn механика — удерживаем пользователя пока категория в разработке</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+    <div class="antichurn-card">
+      <div class="antichurn-icon">🔒</div>
+      <div class="antichurn-title">Показываем, но с замком</div>
+      <div class="antichurn-desc">Все категории видны в интерфейсе. При клике — не ошибка 404, а экран "Скоро". Пользователь видит куда платформа движется, не разочаровывается и не уходит.</div>
+    </div>
+    <div class="antichurn-card">
+      <div class="antichurn-icon">📩</div>
+      <div class="antichurn-title">Email capture "Уведоми меня"</div>
+      <div class="antichurn-desc">Кнопка на экране "Скоро" → сохраняем email/push токен → отправляем нотификацию в день запуска. Ожидаемый эффект: -10–15% к оттоку заинтересованных пользователей.</div>
+    </div>
+    <div class="antichurn-card">
+      <div class="antichurn-icon">📊</div>
+      <div class="antichurn-title">Progress bar "85% готово"</div>
+      <div class="antichurn-desc">Психологический ownership: пользователь ощущает что "почти открылось". Снижает раздражение от ожидания. Можно подкрепить таймером обратного отсчёта к дате запуска.</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══════════════════════════════════════ ALT VARIANTS ══════════════════════════════════════ -->
