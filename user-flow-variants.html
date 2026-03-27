@@ -544,6 +544,78 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </div>
   </div>
 
+  <div class="divider"></div>
+
+  <!-- Архитектура: ставка у нас — исход от Polymarket -->
+  <div class="section-title">Архитектура демо-ставок: как принимаем ставку и получаем исход</div>
+
+  <div class="note-box" style="margin-bottom:20px">
+    Polymarket используется как <strong>read-only оракул исходов</strong>. Реальные ставки на блокчейне не размещаются — всё хранится в нашей БД. Работает для демо-счёта и, в будущем, для реального (когда берём риск как букмекер).
+  </div>
+
+  <!-- Sequence diagram -->
+  <div style="overflow-x:auto; margin-bottom:28px">
+    <div style="display:grid; grid-template-columns: 160px 1fr 160px; gap:0; min-width:600px; font-size:11px">
+
+      <!-- Headers -->
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px 0 0 0;padding:10px 14px;font-weight:700;text-align:center">👤 Пользователь</div>
+      <div style="background:var(--bg3);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 14px;font-weight:700;text-align:center">⚙️ Наш бэкенд</div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:0 8px 0 0;padding:10px 14px;font-weight:700;text-align:center">🌐 Polymarket API</div>
+
+      <!-- Row 1 -->
+      <div style="border:1px solid var(--border);border-top:none;padding:10px 14px;background:var(--bg2);color:var(--muted)">Нажал [UP] на матч<br>Реал vs Барса</div>
+      <div style="border-top:none;border-bottom:1px solid var(--border);padding:10px 14px;background:var(--bg2)">
+        <span style="color:var(--blue)">→ Сохранить в БД:</span><br>
+        <code style="color:var(--muted);font-size:10px">{user_id, condition_id, direction: YES, amount: $100, odds: 1.85}</code>
+      </div>
+      <div style="border:1px solid var(--border);border-top:none;padding:10px 14px;background:var(--bg2);color:var(--muted)">—</div>
+
+      <!-- Row 2 -->
+      <div style="border:1px solid var(--border);border-top:none;padding:10px 14px;background:var(--bg2);color:var(--muted)">—</div>
+      <div style="border-top:none;border-bottom:1px solid var(--border);padding:10px 14px;background:var(--bg2)">
+        <span style="color:var(--muted)">⏱ cron каждые 5 мин:</span><br>
+        <code style="color:var(--blue);font-size:10px">GET /markets?closed=true</code>
+      </div>
+      <div style="border:1px solid var(--border);border-top:none;padding:10px 14px;background:var(--bg2);color:var(--muted)">← Возвращает список завершённых рынков</div>
+
+      <!-- Row 3 -->
+      <div style="border:1px solid var(--border);border-top:none;padding:10px 14px;background:var(--bg2);color:var(--muted)">—</div>
+      <div style="border-top:none;border-bottom:1px solid var(--border);padding:10px 14px;background:var(--bg2)">
+        <span style="color:var(--muted)">Проверяем поле</span> <code style="color:var(--yellow);font-size:10px">outcomePrices</code><br>
+        <code style="color:var(--muted);font-size:10px">["0.52","0.48"]</code> → матч идёт<br>
+        <code style="color:var(--green);font-size:10px">["1.0","0.0"]</code> → <strong style="color:var(--green)">YES победил</strong>
+      </div>
+      <div style="border:1px solid var(--border);border-top:none;padding:10px 14px;background:var(--bg2);color:var(--muted)">—</div>
+
+      <!-- Row 4 -->
+      <div style="border:1px solid var(--border);border-top:none;border-radius:0 0 0 8px;padding:10px 14px;background:rgba(0,200,83,.04);color:var(--green);font-weight:600">+$85 на демо-счёт ✅</div>
+      <div style="border-top:none;border-bottom:1px solid var(--border);padding:10px 14px;background:rgba(0,200,83,.04)">
+        Найти все ставки на condition_id → <span style="color:var(--green)">начислить выплату:</span><br>
+        <code style="color:var(--green);font-size:10px">$100 × 1.85 = $185 (+$85 прибыль)</code>
+      </div>
+      <div style="border:1px solid var(--border);border-top:none;border-radius:0 0 8px 0;padding:10px 14px;background:rgba(0,200,83,.04);color:var(--muted)">—</div>
+    </div>
+  </div>
+
+  <!-- Key facts -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+    <div class="antichurn-card" style="border-color:rgba(88,166,255,.3)">
+      <div class="antichurn-icon">🔍</div>
+      <div class="antichurn-title">Как понять кто выиграл</div>
+      <div class="antichurn-desc">Поле <code>outcomePrices</code> в ответе API.<br><br>Матч идёт: <code>["0.52","0.48"]</code><br>YES выиграл: <code>["1.0","0.0"]</code><br>NO выиграл: <code>["0.0","1.0"]</code></div>
+    </div>
+    <div class="antichurn-card" style="border-color:rgba(255,215,0,.3)">
+      <div class="antichurn-icon">⏱</div>
+      <div class="antichurn-title">Когда приходит исход</div>
+      <div class="antichurn-desc">~2 часа после конца матча (UMA oracle, без споров). Опросить API раз в 5-10 мин — достаточно. Вебхуков у Polymarket нет, только polling.</div>
+    </div>
+    <div class="antichurn-card" style="border-color:rgba(0,200,83,.3)">
+      <div class="antichurn-icon">🏦</div>
+      <div class="antichurn-title">Реальный счёт (будущее)</div>
+      <div class="antichurn-desc">Та же схема: Polymarket — оракул исходов. Пользователь платит фиатом (OVO, Paystack), мы берём риск как букмекер. Блокчейн и USDC не нужны.</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══════════════════════════════════════ ALT VARIANTS ══════════════════════════════════════ -->
