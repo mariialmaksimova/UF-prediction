@@ -188,6 +188,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <button class="tab active" onclick="showPage('va',this)">A — Progressive</button>
   <button class="tab" onclick="showPage('adflow',this)">A — Рекламный флоу</button>
   <button class="tab" onclick="showPage('alt',this)">Альтернативные варианты</button>
+  <button class="tab" onclick="showPage('metrics',this)">📊 Метрики</button>
 </div>
 
 <!-- ══════════════════════════════════════ OVERVIEW ══════════════════════════════════════ -->
@@ -906,6 +907,286 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </div>
 
 </div><!-- /page-alt -->
+
+<!-- ══════════════════════════════════════ METRICS ══════════════════════════════════════ -->
+<div id="page-metrics" class="page">
+  <div class="variant-card" style="border-color:rgba(88,166,255,.3)">
+    <div class="variant-header">
+      <div>
+        <div class="variant-name" style="color:var(--blue)">Метрики по зонам</div>
+        <div class="variant-desc">Карта событий (trackable actions) в каждой зоне. Инструмент: PostHog self-hosted + TikTok Pixel (🇮🇩) + GA4 (🇳🇬)</div>
+      </div>
+      <div class="variant-meta">
+        <span class="meta-pill pill-blue">PostHog</span>
+        <span class="meta-pill pill-green">TikTok Pixel</span>
+        <span class="meta-pill" style="background:rgba(255,140,0,.12);color:var(--orange)">GA4</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:24px">
+
+      <!-- ZONE 0 -->
+      <div>
+        <div class="section-title" style="color:var(--muted)">Zone 0 — Unauth</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(88,166,255,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">1</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Визит сайта</div>
+              <code style="font-size:10px;color:var(--muted)">landing_viewed</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(88,166,255,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">2</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Просмотр списка рынков</div>
+              <code style="font-size:10px;color:var(--muted)">markets_list_viewed</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(88,166,255,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">3</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Клик на категорию <span style="color:var(--muted);font-weight:400">(спорт / погода / техно)</span></div>
+              <code style="font-size:10px;color:var(--muted)">category_clicked {category}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(88,166,255,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">4</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Открытие карточки рынка</div>
+              <code style="font-size:10px;color:var(--muted)">market_card_opened {market_id}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(88,166,255,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">5</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Скролл карточки <span style="color:var(--muted);font-weight:400">(изучил детали)</span></div>
+              <code style="font-size:10px;color:var(--muted)">market_card_scrolled {depth_pct}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(88,166,255,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">6</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Нажатие UP / DOWN <span style="color:var(--orange);font-weight:500">(намерение)</span></div>
+              <code style="font-size:10px;color:var(--muted)">intent_click {direction: "up"|"down"}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(88,166,255,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">7</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Открытие модалки регистрации</div>
+              <code style="font-size:10px;color:var(--muted)">registration_modal_opened</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(88,166,255,.15);color:var(--blue);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">8</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Начало заполнения формы</div>
+              <code style="font-size:10px;color:var(--muted)">registration_started</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid rgba(255,68,68,.3)">
+            <span style="background:rgba(255,68,68,.15);color:var(--red);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">✗</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600;color:var(--muted)">Отказ — закрыл модалку</div>
+              <code style="font-size:10px;color:var(--muted)">registration_modal_dismissed</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(0,200,83,.07);border-radius:8px;border:1px solid rgba(0,200,83,.35)">
+            <span style="background:rgba(0,200,83,.2);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">✅</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:700;color:var(--green)">Завершение регистрации → Zone 1</div>
+              <code style="font-size:10px;color:var(--muted)">registration_complete</code>
+            </div>
+          </div>
+
+          <div style="margin-top:8px;padding:10px 12px;background:rgba(88,166,255,.07);border-radius:8px;border:1px solid rgba(88,166,255,.2);font-size:11px;color:var(--muted);line-height:1.6">
+            <strong style="color:var(--blue)">North Star:</strong> CR0→1 (визит → регистрация)<br>
+            Цель: <strong style="color:var(--text)">8–12%</strong> 🇮🇩 · <strong style="color:var(--text)">6–10%</strong> 🇳🇬<br>
+            <strong style="color:var(--blue)">Key signal:</strong> intent_click rate — лучший pre-reg индикатор
+          </div>
+        </div>
+      </div>
+
+      <!-- ZONE 1 -->
+      <div>
+        <div class="section-title" style="color:var(--muted)">Zone 1 — Demo / Registered</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">1</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Вход в демо-аккаунт</div>
+              <code style="font-size:10px;color:var(--muted)">demo_account_loaded</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">2</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Просмотр демо-баланса</div>
+              <code style="font-size:10px;color:var(--muted)">demo_balance_viewed</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">3</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Выбор рынка</div>
+              <code style="font-size:10px;color:var(--muted)">market_card_opened {market_id, category}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">4</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Переключение типа графика</div>
+              <code style="font-size:10px;color:var(--muted)">chart_type_switched {type: "candle"|"line"|"bar"}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">5</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Выбор UP / DOWN</div>
+              <code style="font-size:10px;color:var(--muted)">bet_direction_selected {direction}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">6</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Ввод суммы ставки</div>
+              <code style="font-size:10px;color:var(--muted)">bet_amount_entered {amount}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">7</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Подтверждение демо-ставки</div>
+              <code style="font-size:10px;color:var(--muted)">bet_placed_demo {market_id, amount, odds}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">8</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Просмотр активных ставок</div>
+              <code style="font-size:10px;color:var(--muted)">active_bets_viewed</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">9</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Просмотр исхода ставки <span style="color:var(--muted);font-weight:400">(выиграл / проиграл)</span></div>
+              <code style="font-size:10px;color:var(--muted)">outcome_viewed {result: "win"|"loss", pnl}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">10</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Возврат на следующий день <span style="color:var(--muted);font-weight:400">(ретеншн)</span></div>
+              <code style="font-size:10px;color:var(--muted)">session_started {day_number: 2+}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">11</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Клик на заблокированный раздел <span style="color:var(--muted);font-weight:400">(🔒 Скоро)</span></div>
+              <code style="font-size:10px;color:var(--muted)">locked_category_viewed {category}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+            <span style="background:rgba(0,200,83,.15);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">12</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Нажатие «Уведоми меня»</div>
+              <code style="font-size:10px;color:var(--muted)">notify_me_clicked {category, channel}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid rgba(255,140,0,.3)">
+            <span style="background:rgba(255,140,0,.15);color:var(--orange);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">13</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600;color:var(--orange)">Клик "Deposit"</div>
+              <code style="font-size:10px;color:var(--muted)">deposit_cta_clicked {location, days_since_reg}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid rgba(255,140,0,.3)">
+            <span style="background:rgba(255,140,0,.15);color:var(--orange);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">14</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Выбор метода пополнения</div>
+              <code style="font-size:10px;color:var(--muted)">payment_method_selected {method}</code>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">🇮🇩 OVO · GoPay · Dana · QRIS &nbsp;|&nbsp; 🇳🇬 Paystack · Flutterwave · USSD</div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid rgba(255,140,0,.3)">
+            <span style="background:rgba(255,140,0,.15);color:var(--orange);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">15</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Переход к форме оплаты</div>
+              <code style="font-size:10px;color:var(--muted)">deposit_form_opened {provider}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:8px;border:1px solid rgba(255,140,0,.3)">
+            <span style="background:rgba(255,140,0,.15);color:var(--orange);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">16</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:600">Подтверждение платежа</div>
+              <code style="font-size:10px;color:var(--muted)">deposit_initiated {amount, provider}</code>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(0,200,83,.07);border-radius:8px;border:1px solid rgba(0,200,83,.35)">
+            <span style="background:rgba(0,200,83,.2);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;min-width:22px;text-align:center">✅</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:700;color:var(--green)">Первый депозит → Zone 2</div>
+              <code style="font-size:10px;color:var(--muted)">ftd_completed {amount, provider, geo}</code>
+            </div>
+          </div>
+
+          <div style="margin-top:8px;padding:10px 12px;background:rgba(0,200,83,.07);border-radius:8px;border:1px solid rgba(0,200,83,.2);font-size:11px;color:var(--muted);line-height:1.6">
+            <strong style="color:var(--green)">North Star:</strong> CR1→2 (FTD Rate)<br>
+            Цель: <strong style="color:var(--text)">25–30%</strong> за 14 дней 🇮🇩 · <strong style="color:var(--text)">20–25%</strong> 🇳🇬<br>
+            <strong style="color:var(--green)">Key signal:</strong> ставка в демо за первые 30 мин → 3× выше FTD
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Global props -->
+    <div style="padding:0 24px 24px">
+      <div class="section-title">Глобальные свойства на каждом событии</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <code style="background:var(--bg2);border:1px solid var(--border);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--blue)">geo</code>
+        <code style="background:var(--bg2);border:1px solid var(--border);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--blue)">user_zone</code>
+        <code style="background:var(--bg2);border:1px solid var(--border);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--blue)">platform</code>
+        <code style="background:var(--bg2);border:1px solid var(--border);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--blue)">utm_source</code>
+        <code style="background:var(--bg2);border:1px solid var(--border);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--blue)">utm_content</code>
+        <code style="background:var(--bg2);border:1px solid var(--border);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--blue)">utm_campaign</code>
+        <code style="background:var(--bg2);border:1px solid var(--border);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--blue)">session_id</code>
+        <code style="background:var(--bg2);border:1px solid var(--border);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--blue)">distinct_id</code>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /page-metrics -->
 
 <script>
 function showPage(id, btn) {
